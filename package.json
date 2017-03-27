@@ -1,0 +1,34 @@
+{
+  "name": "prose-stepper",
+  "version": "0.1.0",
+  "description": "Navigate through the words and sentences of prose text, stepping backward and forward sequentially",
+  "main": "dist/prose-stepper.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knod/prose-stepper.git"
+  },
+  "keywords": [
+    "navigate",
+    "prose",
+    "text",
+    "step",
+    "playback",
+    "forward",
+    "backward",
+    "rewind",
+    "fast-forward",
+    "play",
+    "stepper",
+    "sequence",
+    "linear"
+  ],
+  "author": "knod",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/knod/prose-stepper/issues"
+  },
+  "homepage": "https://github.com/knod/prose-stepper#readme"
+}
