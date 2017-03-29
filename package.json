@@ -1,6 +1,6 @@
 {
-  "name": "prose-stepper",
-  "version": "0.1.0",
+  "name": "@knod/prose-stepper",
+  "version": "0.1.1",
   "description": "Navigate through the words and sentences of prose text, stepping backward and forward sequentially",
   "main": "dist/prose-stepper.js",
   "scripts": {
@@ -30,5 +30,11 @@
   "bugs": {
     "url": "https://github.com/knod/prose-stepper/issues"
   },
-  "homepage": "https://github.com/knod/prose-stepper#readme"
+  "homepage": "https://github.com/knod/prose-stepper#readme",
+  "devDependencies": {
+    "jasmine": "^2.5.3"
+  },
+  "dependencies": {
+    "@knod/hyphenaxe": "^1.0.2"
+  }
 }
