@@ -4,7 +4,8 @@
   "description": "Navigate through the words and sentences of prose text, stepping backward and forward sequentially",
   "main": "dist/prose-stepper.js",
   "scripts": {
-    "test": "test"
+    "test": "jasmine",
+    "bundle": "browserify dist/prose-stepper.js -o bundle.js"
   },
   "repository": {
     "type": "git",
