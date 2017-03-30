@@ -5,7 +5,7 @@
   "main": "dist/prose-stepper.js",
   "scripts": {
     "test": "jasmine",
-    "bundle": "browserify dist/prose-stepper.js -o bundle.js"
+    "browserify": "browserify dist/prose-stepper.js -o bundle.js"
   },
   "repository": {
     "type": "git",
