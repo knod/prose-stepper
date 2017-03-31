@@ -1,11 +1,11 @@
 {
   "name": "@knod/prose-stepper",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Navigate through the words and sentences of prose text, stepping backward and forward sequentially",
   "main": "dist/prose-stepper.js",
   "scripts": {
-    "test": "jasmine",
-    "browserify": "browserify dist/prose-stepper.js -o bundle.js"
+    "build": "browserify dist/prose-stepper.js -o bundle.js",
+    "test": "jasmine"
   },
   "repository": {
     "type": "git",

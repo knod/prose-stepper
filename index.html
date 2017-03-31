@@ -1,0 +1,28 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Prose Stepper Demo</title>
+</head>
+<body>
+	Just in the console at the moment.
+
+	<script src="node_modules/@knod/hyphenaxe/lib/hyphenaxe.js"></script>
+	<script src="dist/prose-stepper.js"></script>
+	<script>
+		var ps 		  = new ProseStepper(),
+			maxChars  = 5,
+			sentences = [  ['Victorious,','you','brave','flag.'], ['Delirious,','I','come','back.'], ['\n'], ['Why,','oh','why?'] ];
+
+		ps.process( sentences, maxChars );
+			
+		var frag1 = ps.getFragment( [0, 0, 1], maxChars ),
+			frag2 = ps.getFragment( [0, 0, 1], maxChars ),
+			frag3 = ps.getFragment( [0, 1, 0], maxChars ),
+			frag4 = ps.getFragment( [1, 0, 0], maxChars ),
+			frag5 = ps.getFragment( [0, 1, 0], maxChars );
+			console.log(frag1, frag2, frag3, frag4, frag5);
+	</script>
+</body>
+</html>
