@@ -104,6 +104,19 @@
         };
 
 
+        // ??: Should this even exist as its own thing?
+        pst.setMaxChars = function ( maxChars ) {
+        /* ( int >= 0 ) -> ProseStepper
+        * 
+        * If the value is a positive integer >= 0, it will be stored.
+        * Otherwise, an error will be thrown.
+        */
+            ifNotPositiveInt( maxChars );
+            pst._maxChars = maxChars;  // Only store after error is avoided
+            return pst;
+        };
+
+
 
        // =====================================
        // GETS
@@ -138,19 +151,6 @@
             pst.rawWord     = pst._stepWord( pst.index );
             pst.splitWord   = pst._split( pst.rawWord, pst._maxChars );
 
-            return pst;
-        };
-
-
-        // ??: Should this even exist as its own thing?
-        pst.setMaxChars = function ( maxChars ) {
-        /* ( int >= 0 ) -> ProseStepper
-        * 
-        * If the value is a positive integer >= 0, it will be stored.
-        * Otherwise, an error will be thrown.
-        */
-            ifNotPositiveInt( maxChars );
-            pst._maxChars = maxChars;  // Only store after error is avoided
             return pst;
         };
 
