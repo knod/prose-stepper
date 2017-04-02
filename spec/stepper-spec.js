@@ -8,7 +8,7 @@ describe("When a ProseStepper instance", function () {
 
 	beforeEach( function () {
 		ps 		  = new ProseStepper();
-		sentences = [  ['Victorious,','you','brave','flag.'], ['Delirious,','I','come','back.'], ['\n'], ['Why,','oh','why?'] ];
+		sentences = [  ['Victorious,','you','brave','flag.'], ['Delirious,','I','come','back.'], ['\n'], ['Why,','oh','walrus?'] ];
 		maxChars  = 5;
 	})
 
@@ -30,7 +30,7 @@ describe("When a ProseStepper instance", function () {
 		// --- Reset ---
 		describe("and is manipulated in any way,", function () {
 			
-			it("`.restart` should start from the beginning again.", function () {
+			it("`.restart()` should start from the beginning again.", function () {
 				ps.getFragment( [0, 1, 0], maxChars );
 				ps.getFragment( [0, 1, 0], maxChars );
 				ps.getFragment( [0, 1, 0], maxChars );
@@ -55,7 +55,7 @@ describe("When a ProseStepper instance", function () {
 			describe("1 sentence", function () {
 
 				it("at the very last sentence, it should return the last word in the last sentence.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					ps.getFragment( [3, 0, 0], maxChars );
 					expect( ps.getFragment( [1, 0, 0], maxChars )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
@@ -97,7 +97,7 @@ describe("When a ProseStepper instance", function () {
 			describe("3 sentences", function () {
 
 				it("at the very last sentence, it should return the last word in the last sentence.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					ps.getFragment( [3, 0, 0], maxChars );
 					expect( ps.getFragment( [3, 0, 0], maxChars )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
@@ -130,7 +130,7 @@ describe("When a ProseStepper instance", function () {
 			describe("more sentences than exist", function () {
 
 				it("it should return the 1st fragment in the last word in the last sentence.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					expect( ps.getFragment( [5, 0, 0], maxChars )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 				});
@@ -142,7 +142,7 @@ describe("When a ProseStepper instance", function () {
 			describe("1 word", function () {
 
 				it("at the very last word, it should return the last word in the last sentence.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					expect( ps.getFragment( [4, 0, 0], maxChars )).toEqual( result );
 					expect( ps.getFragment( [0, 1, 0], maxChars )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
@@ -193,13 +193,10 @@ describe("When a ProseStepper instance", function () {
 			});  // End 1 word
 
 
-// ------------- !!! need more retention tests under here
-
-
 			describe("2 words", function () {
 
 				it("at the very last word, it should return the last word in the last sentence.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					expect( ps.getFragment( [4, 0, 0], maxChars )).toEqual( result );
 					expect( ps.getFragment( [0, 2, 0], maxChars )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
@@ -240,7 +237,7 @@ describe("When a ProseStepper instance", function () {
 			describe("more words than exist", function () {
 
 				it("should return the 1st fragment in the last word in the last sentence.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					expect( ps.getFragment( [0, 100, 0], maxChars )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 				});
@@ -252,17 +249,15 @@ describe("When a ProseStepper instance", function () {
 
 				describe("at the very last fragment,", function () {
 
-					xit("!!! CHANGE THE LAST WORD IN THE SAMPLE TO MULTI-FRAGMENT WORD FOR THE SAKE OF THIS TEST AT THE VERY LEAST !!!")
-
 					it("should return the last fragment in the last word in the last sentence.", function () {
-						var result = 'why?';
-						expect( ps.getFragment( [4, 0, 0], maxChars )).toEqual( result );
+						var result = 'us?';
+						expect( ps.getFragment( [4, 0, 0], maxChars )).toEqual( 'walr-' );
 						expect( ps.getFragment( [0, 0, 1], maxChars )).toEqual( result );
 						expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 					});
 
 					describe("and then asked for the current fragment", function () {
-				//x
+
 						it("should retain a the position at the last fragment.", function () {
 							ps.getFragment( [4, 0, 0], maxChars )
 							var frag1 = ps.getFragment( [0, 0, 1], maxChars )
@@ -291,12 +286,12 @@ describe("When a ProseStepper instance", function () {
 					});
 
 					describe("and then, asked for the current fragment,", function () {
-				//x
+
 						it("should retain the mid-word fragment position (the 2nd fragment when at the start of a 3 fragment word).", function () {
 							var frag1 = ps.getFragment( [0, 0, 1], maxChars )
 							expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( frag1 )
 						});
-				//x
+
 						it("should retain the mid-word fragment position (the 3rd fragment when in the 2nd fragment of a 3 fragment word).", function () {
 							ps.getFragment( [0, 0, 1], maxChars )
 							var frag1 = ps.getFragment( [0, 0, 1], maxChars )
@@ -335,10 +330,12 @@ describe("When a ProseStepper instance", function () {
 
 				describe("at the very last fragment,", function () {
 					
+					// TODO: Desired behavior? Elsewhere, we get the first fragment in the
+					// next word. On the last word, which fragment do we want?
 					it("it should return the last fragment in the last word in the last sentence.", function () {
-						var result = 'why?';
+						var result = 'walr-';
 						expect( ps.getFragment( [4, 0, 0], maxChars )).toEqual( result );
-						expect( ps.getFragment( [0, 0, 2], maxChars )).toEqual( result );
+						expect( ps.getFragment( [0, 0, 2], maxChars )).toEqual( result );  // Want 'us?'
 						expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 					});
 
@@ -649,21 +646,21 @@ describe("When a ProseStepper instance", function () {
 			describe("of -1 should get the last word", function () {
 				
 				it("when starting at the start of the collection.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					expect( ps.getFragment( 0 ) ).toEqual( 'Vict-' );
 					expect( ps.getFragment( -1 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 				});
 				
 				it("when starting at the middle of the collection.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					expect( ps.getFragment( 5 ) ).toEqual( 'I' );
 					expect( ps.getFragment( -1 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 				});
 				
 				it("when starting at the end of the collection.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					expect( ps.getFragment( 11 ) ).toEqual( result );
 					expect( ps.getFragment( -1 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
@@ -689,7 +686,7 @@ describe("When a ProseStepper instance", function () {
 				
 				it("when starting at the end of the collection.", function () {
 					var result = 'oh';
-					expect( ps.getFragment( 11 ) ).toEqual( 'why?' );
+					expect( ps.getFragment( 11 ) ).toEqual( 'walr-' );
 					expect( ps.getFragment( -2 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 				});
@@ -712,7 +709,7 @@ describe("When a ProseStepper instance", function () {
 				});
 				it("when starting at the end of the collection.", function () {
 					var result = 'Vict-';
-					expect( ps.getFragment( 11 ) ).toEqual( 'why?' );
+					expect( ps.getFragment( 11 ) ).toEqual( 'walr-' );
 					expect( ps.getFragment( 0 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 				});
@@ -735,7 +732,7 @@ describe("When a ProseStepper instance", function () {
 				});
 				it("when starting at the end of the collection.", function () {
 					var result = 'I';
-					expect( ps.getFragment( 11 ) ).toEqual( 'why?' );
+					expect( ps.getFragment( 11 ) ).toEqual( 'walr-' );
 					expect( ps.getFragment( 5 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 				});
@@ -745,20 +742,20 @@ describe("When a ProseStepper instance", function () {
 			describe("of 11, in the 12 word collection, should get the 12th word", function () {
 				
 				it("when starting at the start of the collection.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					expect( ps.getFragment( 0 ) ).toEqual( 'Vict-' );
 					expect( ps.getFragment( 11 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 				});
 				it("when starting at the middle of the collection.", function () {
-					var result = 'why?';
+					var result = 'walr-';
 					expect( ps.getFragment( 5 ) ).toEqual( 'I' );
 					expect( ps.getFragment( 11 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 				});
 				it("even when starting at the end of the collection.", function () {
-					var result = 'why?';
-					expect( ps.getFragment( 11 ) ).toEqual( 'why?' );
+					var result = 'walr-';
+					expect( ps.getFragment( 11 ) ).toEqual( 'walr-' );
 					expect( ps.getFragment( 11 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0], maxChars )).toEqual( result );  // retain position
 				});
@@ -768,6 +765,7 @@ describe("When a ProseStepper instance", function () {
 		});  // End call `.getFragment()` using an index number
 
 
+		// --- Getters ---
 		describe("and the number of strings in the array is 12", function () {
 
 			describe("should return progress as a fraction based on: current word (not fragment) number / number of total words.", function () {
@@ -830,17 +828,102 @@ describe("When a ProseStepper instance", function () {
 				expect( ps.getLength() ).toEqual( 12 );
 			});
 
-		});  // End `.get` progress, index, and length
+		});  // End `.get` progress, index, and length for length 12 collection
 
 
-		xit("change maxChars")
+
+		// --- Reset maxChars ---
+		describe("and it's maximum characters is reset", function () {
+
+			describe("through `.setMaxChars()`", function () {
+
+				describe("should change the length of the strings returned accordingly", function () {
+					
+					it("to 20 characters, and stay that way.", function () {
+						ps.setMaxChars(20);
+						expect( ps.getFragment( [0, 0, 0] )).toEqual('Victorious,');
+						expect( ps.getFragment( [0, 0, 1] )).toEqual('you');
+					});
+					
+					it("to 2 characters, and stay that way.", function () {
+						ps.setMaxChars(2);
+						expect( ps.getFragment( [0, 0, 0] )).toEqual('V-');
+						expect( ps.getFragment( [0, 0, 1] )).toEqual('i-');
+					});
+
+				});
+
+			});  // End `.setMaxChars()`
+
+			describe("through `.getFragment()`", function() {
+
+				describe("should change the length of the strings returned accordingly", function () {
+					
+					it("to 20 characters, and stay that way.", function () {
+						expect( ps.getFragment( [0, 0, 0], 20 )).toEqual('Victorious,');
+						expect( ps.getFragment( [0, 0, 1] )).toEqual('you');
+					});
+					
+					it("to 2 characters, and stay that way.", function () {
+						expect( ps.getFragment( [0, 0, 0], 2 )).toEqual('V-');
+						expect( ps.getFragment( [0, 0, 1] )).toEqual('i-');
+					});
+
+				});
+
+			});  // End `.getFragment()`
+
+			describe("through `.restart()`", function() {
+
+				describe("should change the length of the strings returned accordingly", function () {
+					
+					it("to 20 characters, and stay that way.", function () {
+						ps.restart( 20 )
+						expect( ps.getFragment( [0, 0, 0] )).toEqual('Victorious,');
+						expect( ps.getFragment( [0, 0, 1] )).toEqual('you');
+					});
+					
+					it("to 2 characters, and stay that way.", function () {
+						ps.restart( 2 )
+						expect( ps.getFragment( [0, 0, 0] )).toEqual('V-');
+						expect( ps.getFragment( [0, 0, 1] )).toEqual('i-');
+					});
+
+				});
+
+			});  // End `.restart()`
+
+			describe("while in the middle of a multi-fragment word", function() {
+				
+				describe("to 20 characters", function () {
+
+					it("the word should restart, providing the correct number of characters.", function () {
+						expect( ps.getFragment( [0, 0, 1] )).toEqual('orio-');
+						expect( ps.getFragment( [0, 0, 0], 20 )).toEqual('Victorious,');
+						expect( ps.getFragment( [0, 0, 1] )).toEqual('you');
+					});
+				});
+				
+				describe("to 2 characters", function () {
+
+					it("the word should restart, providing the correct number of characters.", function () {
+						expect( ps.getFragment( [0, 0, 1] )).toEqual('orio-');
+						expect( ps.getFragment( [0, 0, 0], 2 )).toEqual('V-');
+						expect( ps.getFragment( [0, 0, 1] )).toEqual('i-');
+					});
+
+				});
+
+			});  // End middle of multi-fragment word
+
+		});  // End maxChars
 
 	});  // End expected values
 
 	// "When a ProseStepper instance"
 	describe("gets unexpected values", function () {
 
-		// Takes: [[str]], int. Can't allow placeholder value - .positions can't be created properly otherwise
+		// Takes: [[str]], int. Can't allow placeholder value - `.positions` can't be created properly otherwise
 		describe("for `.process()`,", function () {
 
 			// No processing before each
@@ -985,7 +1068,7 @@ describe("When a ProseStepper instance", function () {
 
 			});
 
-			describe("the 2nd argument is not a number >= 0,", function () {
+			describe("the 2nd argument is not a number > 0,", function () {
 
 				it(", `null`, it should throw an TYPE error", function () {
 					expect( function () { ps.process( sentences, null ); }).toThrowError( TypeError );
@@ -1011,8 +1094,12 @@ describe("When a ProseStepper instance", function () {
 					expect( function () { ps.process( sentences, [] ); }).toThrowError( TypeError );
 				});
 
+				it(", `0`, it should throw an TYPE error", function () {
+					expect( function () { ps.process( sentences, 0 ); }).toThrowError( RangeError );
+				});
+
 				it(", `-1`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, -1 ); }).toThrowError( TypeError );
+					expect( function () { ps.process( sentences, -1 ); }).toThrowError( RangeError );
 				});
 
 				it(", `1.1`, it should throw an TYPE error", function () {
@@ -1216,7 +1303,7 @@ describe("When a ProseStepper instance", function () {
 			});
 
 
-			describe("the 2nd argument is not an integer >= 0,", function () {
+			describe("the 2nd argument is not an integer > 0,", function () {
 
 				it(", `null`, it should throw an TYPE error", function () {
 					expect( function () { ps.getFragment( step, null ); }).toThrowError( TypeError );
@@ -1242,8 +1329,12 @@ describe("When a ProseStepper instance", function () {
 					expect( function () { ps.getFragment( step, [] ); }).toThrowError( TypeError );
 				});
 
+				it(", `0`, it should throw an TYPE error", function () {
+					expect( function () { ps.process( sentences, 0 ); }).toThrowError( RangeError );
+				});
+
 				it(", `-1`, it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( step, -1 ); }).toThrowError( TypeError );
+					expect( function () { ps.getFragment( step, -1 ); }).toThrowError( RangeError );
 				});
 
 				it(", `1.1`, it should throw an TYPE error", function () {
@@ -1258,10 +1349,10 @@ describe("When a ProseStepper instance", function () {
 
 		});  // End .getFragment()
 
-		// Takes: positive int >= 0
+		// Takes: positive int > 0 or undefined
 		describe("for `.restart()`", function () {
 
-			describe("with argument that's not a positive int >= 0", function () {  // (This passes in current version, needs fix)
+			describe("with argument that's not a positive int > 0", function () {  // (This passes in current version, needs fix)
 
 				it(", `null`, it should throw an TYPE error", function () {
 					expect( function () { ps.restart( null ); }).toThrowError( TypeError );
@@ -1287,8 +1378,12 @@ describe("When a ProseStepper instance", function () {
 					expect( function () { ps.restart( [] ); }).toThrowError( TypeError );
 				});
 
+				it(", `0`, it should throw an TYPE error", function () {
+					expect( function () { ps.restart( 0 ); }).toThrowError( RangeError );
+				});
+
 				it(", `-1`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( -1 ); }).toThrowError( TypeError );
+					expect( function () { ps.restart( -1 ); }).toThrowError( RangeError );
 				});
 
 				it(", `1.1`, it should throw an TYPE error", function () {
@@ -1299,13 +1394,58 @@ describe("When a ProseStepper instance", function () {
 					expect( function () { ps.restart( "[['text']]" ); }).toThrowError( TypeError );
 				});
 
-			});  // End 
+			});  // End unexpected value
 
 		});  // End .restart()
 
+		// Takes: positive int > 0
+		describe("for `.setMaxChars()`", function () {
 
-		xit("change maxChars")
+			describe("with argument that's not a positive int > 0", function () {  // (This passes in current version, needs fix)
 
+				it(", `null`, it should throw an TYPE error", function () {
+					expect( function () { ps.setMaxChars( null ); }).toThrowError( TypeError );
+				});
+
+				it(", `true`, it should throw an TYPE error", function () {
+					expect( function () { ps.setMaxChars( true ); }).toThrowError( TypeError );
+				});
+
+				it(", `false`, it should throw an TYPE error", function () {
+					expect( function () { ps.setMaxChars( false ); }).toThrowError( TypeError );
+				});
+
+				it(", `NaN`, it should throw an TYPE error", function () {
+					expect( function () { ps.setMaxChars( NaN ); }).toThrowError( TypeError );
+				});
+
+				it(", `{}`, it should throw an TYPE error", function () {
+					expect( function () { ps.setMaxChars( {} ); }).toThrowError( TypeError );
+				});
+
+				it(", `[]`, it should throw an TYPE error", function () {
+					expect( function () { ps.setMaxChars( [] ); }).toThrowError( TypeError );
+				});
+
+				it(", `0`, it should throw an TYPE error", function () {
+					expect( function () { ps.setMaxChars( 0 ); }).toThrowError( RangeError );
+				});
+
+				it(", `-1`, it should throw an TYPE error", function () {
+					expect( function () { ps.setMaxChars( -1 ); }).toThrowError( RangeError );
+				});
+
+				it(", `1.1`, it should throw an TYPE error", function () {
+					expect( function () { ps.setMaxChars( 1.1 ); }).toThrowError( TypeError );
+				});
+
+				it(", `'[['text']]'`, it should throw an TYPE error", function () {
+					expect( function () { ps.setMaxChars( "[['text']]" ); }).toThrowError( TypeError );
+				});
+
+			});  // End unexpected value
+
+		});  // End .setMaxChars()
 
 	});  // End Unexpected Values
 

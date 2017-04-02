@@ -106,9 +106,9 @@
 
         // ??: Should this even exist as its own thing?
         pst.setMaxChars = function ( maxChars ) {
-        /* ( int >= 0 ) -> ProseStepper
+        /* ( int > 0 ) -> ProseStepper
         * 
-        * If the value is a positive integer >= 0, it will be stored.
+        * If the value is a positive integer > 0, it will be stored.
         * Otherwise, an error will be thrown.
         */
             ifNotPositiveInt( maxChars );
@@ -226,10 +226,16 @@
 
 
         pst._stepFragment = function ( fragChange ) {
-        /*
+        /* ( int ) -> Int
         * 
-        * NOTE: This returns an index number for the fragment position,
-        * not a new word (unlike other steps/jumps)
+        * NOTE: This returns an index number for the fragment position
+        * (`.position[2]`), not a new word (unlike other steps/jumps)
+        * May also change the `.rawWord` value.
+        * 
+        * Progresses forward or backward through fragments, but with a
+        * maximum change of one word, no matter how big the change.
+        * Returns the new fragment position, which will be 0 if there's
+        * a word change.
         */
             var pos         = pst.position,
                 fragi       = pos[2] + fragChange,
@@ -245,8 +251,8 @@
                 pst.rawWord = pst._stepWord( pst.index - 1 );
 
             } else {
-                // don't change index or current word, just current fragment position
-                // The only place where pos[2] isn't 0
+                // Don't change index or current word, just current fragment position
+                // The only place where pos[2] doesn't end up at 0
                 returnIndex = fragi;
             }
 
@@ -368,7 +374,7 @@
         * aren't arrays of arrays of strings. Otherwise, will return `true`
         */
 
-            var msg = 'Was expecting an array of array of strings. Recieved: ' + Object.prototype.toString.call( arg );
+            var msg = 'Was expecting an array of array of strings. Recieved: ' + arg + ', an ' + Object.prototype.toString.call( arg );
 
             if ( arg === undefined ) { throw new ReferenceError( msg ); }
 
@@ -395,7 +401,7 @@
         * Will throw necessary errors for bad references or things that
         * aren't ints or arrays of ints. Otherwise, will return `true`
         */
-            var msg = 'Was expecting an array of integers. Recieved: ' + Object.prototype.toString.call( arg );
+            var msg = 'Was expecting an array of integers. Recieved: ' + arg + ', an ' + Object.prototype.toString.call( arg );
 
             // Can be positive or negative
             if ( isInt( arg ) ) { return true; }  // Can be an index position
@@ -417,17 +423,19 @@
 
 
         var ifNotPositiveInt = function ( arg ) {
-        /* ( int >= 0 ) -> True or throw error
+        /* ( int > 0 ) -> True or throw error
         * 
         * Will throw necessary errors for bad references or non-numbers.
         * Otherwise, will return `true`
         */
-            var msg = 'Was expecting positive integer > 0. Recieved: ' + Object.prototype.toString.call( arg );
+            var msg = 'Was expecting positive integer > 0. Recieved: ' + arg + ', an ' + Object.prototype.toString.call( arg );
 
             if ( arg === undefined ) {
                 throw new ReferenceError( msg );
-            } else if ( !isInt( arg ) || !(arg >= 0) ) {
+            } else if ( !isInt( arg ) ) {
                 throw new TypeError( msg );
+            } else if ( !(arg > 0) ) {
+                throw new RangeError( msg );
             }
             // Otherwise, we're cool
             return true;
