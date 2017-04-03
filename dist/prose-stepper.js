@@ -26,6 +26,7 @@
 *   `.process()`?
 * - Refactor `._stepFragment()` so that `.rawWord` isn't changed
 *   invisibly
+* - Don't hyphenate words under 4 letters???
 */
 
 (function (root, stepFactory) {  // root is usually `window`
@@ -67,9 +68,12 @@
        // =====================================
 
         pst._split      = split;  // func
+        pst._splitOpts  = { separator: '-' };
+
         pst._progress   = 0;
         var sentences   = pst._sentences = null;
         var positions   = pst._positions = [];
+        
         pst._maxChars;  // TODO: ??: Default or required argument? Default hides errors?
 
 
@@ -78,7 +82,7 @@
        // SET UP NEW DATA
        // =====================================
 
-        pst.process = function ( sentenceArray, maxChars ) {
+        pst.process = function ( sentenceArray, maxChars, splitterOptions ) {
         /* 
         * TODO: Some way to get maxChars out of here. Need it for
         * establishing the first current word, which is needed
@@ -87,6 +91,7 @@
             ifNotArrayOfArraysOfStrings( sentenceArray );
 
             pst.setMaxChars( maxChars )
+            pst._splitOpts = splitterOptions || pst._splitOpts;
 
             sentences = pst._sentences = sentenceArray;  
             positions.splice( 0, positions.length );  // Empty non-destructively
@@ -111,8 +116,13 @@
         * If the value is a positive integer > 0, it will be stored.
         * Otherwise, an error will be thrown.
         */
-            ifNotPositiveInt( maxChars );
-            pst._maxChars = maxChars;  // Only store after error is avoided
+            // If no established maxChars have to try
+            // or if new value for maxChars, have to try to assign
+            if ( !pst._maxChars || pst._maxChars !== maxChars ) {
+                ifNotPositiveInt( maxChars );
+                pst._maxChars = maxChars;  // Only store after error is avoided
+            }
+
             return pst;
         };
 
@@ -139,11 +149,7 @@
         pst.restart = function ( maxChars ) {
             // ??: Return first fragment?
 
-            // If there's not already a value for internal maxChars,
-            // we absolutely need one here
-            if ( maxChars !== undefined && pst._maxChars !== maxChars ) {
-                pst.setMaxChars( maxChars );
-            }
+            if ( maxChars !== undefined ) { pst.setMaxChars( maxChars ); }
 
             pst.index    = 0;
             pst.position = [ 0, 0, 0 ];
@@ -155,7 +161,7 @@
         };
 
 
-        pst.getFragment = function ( changesOrIndex, maxChars ) {
+        pst.getFragment = function ( changesOrIndex, maxChars, splitterOptions ) {
         /* ( [int, int, int] or int ) -> Str
         * 
         * Currently it seems that only one of the ints can be something
@@ -196,7 +202,8 @@
             } // end if index or which position changed
 
             // In case rawWord has changed
-            pst.splitWord = pst._split( pst.rawWord, pst._maxChars );
+            pst._splitOpts = splitterOptions || pst._splitOpts;
+            pst.splitWord  = pst._split( pst.rawWord, pst._maxChars, pst._splitOpts );
 
             // If not a fragment change or if maxChars was changed,
             // negating the validity of old fragment positions
@@ -408,6 +415,8 @@
 
             // Otherwise must be an array of ints
             if ( arg === undefined ) { throw new ReferenceError( msg ) }
+
+            try { arg[0] } catch (err) { throw new TypeError( msg ) }
 
             // no errors on [0, 0, 0]
             if ( !isInt( arg[0] ) ) { throw new TypeError( msg ) }

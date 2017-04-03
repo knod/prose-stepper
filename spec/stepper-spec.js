@@ -2,6 +2,16 @@
 var ProseStepper = require('../dist/prose-stepper.js');
 
 
+/* Notes:
+* - To fully test retention of position once a position has been set,
+* the 'current position' test needs to be run after every test. There
+* are a few tests explicitly for retention, but otherwise, they are
+* at the end of every other relevant test.
+* - Any problems with `splitterOptions`, the third argument, will be
+* handled by the splitter (in this case, hyphenaxe).
+*/
+
+
 describe("When a ProseStepper instance", function () {
 
 	var ps, maxChars, sentences;
@@ -39,13 +49,6 @@ describe("When a ProseStepper instance", function () {
 			});
 
 		});
-
-		/* Notes:
-		* - To fully test retention of position once a position has been set,
-		* the 'current position' test needs to be run after every test. There
-		* are a few tests explicitly for retention, but otherwise, they are
-		* at the end of every other relevant test.
-		*/
 
 
 		// --- Forward ---
@@ -920,6 +923,8 @@ describe("When a ProseStepper instance", function () {
 
 	});  // End expected values
 
+
+	// ==== UNEXPECTED VALUES, CUSTOM ERROR MESSAGES ====
 	// "When a ProseStepper instance"
 	describe("gets unexpected values", function () {
 
@@ -931,7 +936,7 @@ describe("When a ProseStepper instance", function () {
 			describe("the 1st argument is undefined,", function () {
 
 				it("it should throw an REFERENCE error", function () {
-					expect( function () { ps.process(); }).toThrowError( ReferenceError );
+					expect( function () { ps.process(); }).toThrowError( ReferenceError, /Was expecting/ );
 				});
 
 			});
@@ -940,120 +945,120 @@ describe("When a ProseStepper instance", function () {
 
 				describe("it's not an array at all,", function () {
 
-					it("(null) it should throw an TYPE error", function () {
-						expect( function () { ps.process( null, maxChars ); }).toThrowError( TypeError );
+					it("(null) it should throw a TYPE error", function () {
+						expect( function () { ps.process( null, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(true) it should throw an TYPE error", function () {
-						expect( function () { ps.process( true, maxChars ); }).toThrowError( TypeError );
+					it("(true) it should throw a TYPE error", function () {
+						expect( function () { ps.process( true, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(false) it should throw an TYPE error", function () {
-						expect( function () { ps.process( false, maxChars ); }).toThrowError( TypeError );
+					it("(false) it should throw a TYPE error", function () {
+						expect( function () { ps.process( false, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(NaN) it should throw an TYPE error", function () {
-						expect( function () { ps.process( NaN, maxChars ); }).toThrowError( TypeError );
+					it("(NaN) it should throw a TYPE error", function () {
+						expect( function () { ps.process( NaN, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(0) it should throw an TYPE error", function () {
-						expect( function () { ps.process( 0, maxChars ); }).toThrowError( TypeError );
+					it("(0) it should throw a TYPE error", function () {
+						expect( function () { ps.process( 0, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(1) it should throw an TYPE error", function () {
-						expect( function () { ps.process( 1, maxChars ); }).toThrowError( TypeError );
+					it("(1) it should throw a TYPE error", function () {
+						expect( function () { ps.process( 1, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(number) it should throw an TYPE error", function () {
-						expect( function () { ps.process( 2, maxChars ); }).toThrowError( TypeError );
+					it("(number) it should throw a TYPE error", function () {
+						expect( function () { ps.process( 2, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(string) it should throw an TYPE error", function () {
-						expect( function () { ps.process( 'test', maxChars ); }).toThrowError( TypeError );
+					it("(string) it should throw a TYPE error", function () {
+						expect( function () { ps.process( 'test', maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
 				});  // === other
 
 				describe("it's an array of something else,", function () {
 
-					it("([]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [], maxChars ); }).toThrowError( TypeError );
+					it("([]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([null, null]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [null, null], maxChars ); }).toThrowError( TypeError );
+					it("([null, null]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [null, null], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([true]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [true], maxChars ); }).toThrowError( TypeError );
+					it("([true]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [true], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([false]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [false], maxChars ); }).toThrowError( TypeError );
+					it("([false]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [false], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([NaN]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [NaN], maxChars ); }).toThrowError( TypeError );
+					it("([NaN]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [NaN], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([{}]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [{}], maxChars ); }).toThrowError( TypeError );
+					it("([{}]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [{}], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([0]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [0], maxChars ); }).toThrowError( TypeError );
+					it("([0]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([1]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [1], maxChars ); }).toThrowError( TypeError );
+					it("([1]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [1], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([number]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [2], maxChars ); }).toThrowError( TypeError );
+					it("([number]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [2], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([string]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( ['test'], maxChars ); }).toThrowError( TypeError );
+					it("([string]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( ['test'], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
 				});  // === [other]
 
 				describe("it's an array of arrays of something else,", function () {
 
-					it("([[]]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [[]], maxChars ); }).toThrowError( TypeError );
+					it("([[]]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [[]], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([[null, null]]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [[null, null]], maxChars ); }).toThrowError( TypeError );
+					it("([[null, null]]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [[null, null]], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([[true]]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [[true]], maxChars ); }).toThrowError( TypeError );
+					it("([[true]]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [[true]], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([[false]]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [[false]], maxChars ); }).toThrowError( TypeError );
+					it("([[false]]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [[false]], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([[NaN]]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [[NaN]], maxChars ); }).toThrowError( TypeError );
+					it("([[NaN]]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [[NaN]], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([[{}]]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [[{}]], maxChars ); }).toThrowError( TypeError );
+					it("([[{}]]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [[{}]], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([[0]]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [[0]], maxChars ); }).toThrowError( TypeError );
+					it("([[0]]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [[0]], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([[1]]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [[1]], maxChars ); }).toThrowError( TypeError );
+					it("([[1]]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [[1]], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([[2]]) it should throw an TYPE error", function () {
-						expect( function () { ps.process( [[2]], maxChars ); }).toThrowError( TypeError );
+					it("([[2]]) it should throw a TYPE error", function () {
+						expect( function () { ps.process( [[2]], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
 				});  // === [[other]]
@@ -1063,51 +1068,51 @@ describe("When a ProseStepper instance", function () {
 			describe("the 2nd argument is undefined,", function () {
 
 				it("it should throw an REFERENCE error", function () {
-					expect( function () { ps.process( sentences ); }).toThrowError( ReferenceError );
+					expect( function () { ps.process( sentences ); }).toThrowError( ReferenceError, /Was expecting/ );
 				});
 
 			});
 
 			describe("the 2nd argument is not a number > 0,", function () {
 
-				it(", `null`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, null ); }).toThrowError( TypeError );
+				it(", `null`, it should throw a TYPE error", function () {
+					expect( function () { ps.process( sentences, null ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `true`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, true ); }).toThrowError( TypeError );
+				it(", `true`, it should throw a TYPE error", function () {
+					expect( function () { ps.process( sentences, true ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `false`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, false ); }).toThrowError( TypeError );
+				it(", `false`, it should throw a TYPE error", function () {
+					expect( function () { ps.process( sentences, false ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `NaN`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, NaN ); }).toThrowError( TypeError );
+				it(", `NaN`, it should throw a TYPE error", function () {
+					expect( function () { ps.process( sentences, NaN ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `{}`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, {} ); }).toThrowError( TypeError );
+				it(", `{}`, it should throw a TYPE error", function () {
+					expect( function () { ps.process( sentences, {} ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `[]`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, [] ); }).toThrowError( TypeError );
+				it(", `[]`, it should throw a TYPE error", function () {
+					expect( function () { ps.process( sentences, [] ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `0`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, 0 ); }).toThrowError( RangeError );
+				it(", `0`, it should throw a TYPE error", function () {
+					expect( function () { ps.process( sentences, 0 ); }).toThrowError( RangeError, /Was expecting/ );
 				});
 
-				it(", `-1`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, -1 ); }).toThrowError( RangeError );
+				it(", `-1`, it should throw a TYPE error", function () {
+					expect( function () { ps.process( sentences, -1 ); }).toThrowError( RangeError, /Was expecting/ );
 				});
 
-				it(", `1.1`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, 1.1 ); }).toThrowError( TypeError );
+				it(", `1.1`, it should throw a TYPE error", function () {
+					expect( function () { ps.process( sentences, 1.1 ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `'[['text']]'`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, "[['text']]" ); }).toThrowError( TypeError );
+				it(", `'[['text']]'`, it should throw a TYPE error", function () {
+					expect( function () { ps.process( sentences, "[['text']]" ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
 			});  // End 2nd argument
@@ -1126,39 +1131,39 @@ describe("When a ProseStepper instance", function () {
 			describe("the 1st argument is undefined,", function () {
 
 				it("it should throw an REFERENCE error", function () {
-					expect( function () { ps.getFragment(); }).toThrowError( ReferenceError );
+					expect( function () { ps.getFragment(); }).toThrowError( ReferenceError, /Was expecting/ );
 				});
 
 			});
 
 			describe("the 1st argument is not array,", function () {
 
-				it("(null) it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( null, maxChars ); }).toThrowError( TypeError );
+				it("(null) it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( null, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it("(true) it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( true, maxChars ); }).toThrowError( TypeError );
+				it("(true) it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( true, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it("(false) it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( false, maxChars ); }).toThrowError( TypeError );
+				it("(false) it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( false, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it("(NaN) it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( NaN, maxChars ); }).toThrowError( TypeError );
+				it("(NaN) it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( NaN, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it("({}) it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( {}, maxChars ); }).toThrowError( TypeError );
+				it("({}) it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( {}, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it("(1.1) it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( 1.1, maxChars ); }).toThrowError( TypeError );
+				it("(1.1) it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( 1.1, maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it("('test') it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( 'test', maxChars ); }).toThrowError( TypeError );
+				it("('test') it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( 'test', maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
 			});  // End 1st !== []
@@ -1168,120 +1173,120 @@ describe("When a ProseStepper instance", function () {
 
 				describe("in the 1st slot,", function () {
 
-					it("(undefined) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [undefined, 0, 0], maxChars ); }).toThrowError( TypeError );
+					it("(undefined) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [undefined, 0, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(null) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [null, 0, 0], maxChars ); }).toThrowError( TypeError );
+					it("(null) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [null, 0, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(true) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [true, 0, 0], maxChars ); }).toThrowError( TypeError );
+					it("(true) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [true, 0, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(false) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [false, 0, 0], maxChars ); }).toThrowError( TypeError );
+					it("(false) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [false, 0, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(NaN) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [NaN, 0, 0], maxChars ); }).toThrowError( TypeError );
+					it("(NaN) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [NaN, 0, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([]) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [[], 0, 0], maxChars ); }).toThrowError( TypeError );
+					it("([]) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [[], 0, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("({}) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [{}, 0, 0], maxChars ); }).toThrowError( TypeError );
+					it("({}) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [{}, 0, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(1.1) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [1.1, 0, 0], maxChars ); }).toThrowError( TypeError );
+					it("(1.1) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [1.1, 0, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("('test') it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( ['test', 0, 0], maxChars ); }).toThrowError( TypeError );
+					it("('test') it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( ['test', 0, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
 				});  // End 1st arg === [other, int, int]
 
 				describe("in the 2nd slot,", function () {
 
-					it("(undefined) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, undefined, 0], maxChars ); }).toThrowError( TypeError );
+					it("(undefined) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, undefined, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(null) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, null, 0], maxChars ); }).toThrowError( TypeError );
+					it("(null) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, null, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(true) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, true, 0], maxChars ); }).toThrowError( TypeError );
+					it("(true) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, true, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(false) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, false, 0], maxChars ); }).toThrowError( TypeError );
+					it("(false) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, false, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(NaN) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, NaN, 0], maxChars ); }).toThrowError( TypeError );
+					it("(NaN) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, NaN, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([]) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, [], 0], maxChars ); }).toThrowError( TypeError );
+					it("([]) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, [], 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("({}) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, {}, 0], maxChars ); }).toThrowError( TypeError );
+					it("({}) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, {}, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(1.1) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 1.1, 0], maxChars ); }).toThrowError( TypeError );
+					it("(1.1) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 1.1, 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("('test') it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 'test', 0], maxChars ); }).toThrowError( TypeError );
+					it("('test') it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 'test', 0], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
 				});  // End 1st arg === [int, other, int]
 
 				describe("in the 3rd slot,", function () {
 
-					it("(undefined) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 0, undefined], maxChars ); }).toThrowError( TypeError );
+					it("(undefined) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 0, undefined], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(null) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 0, null], maxChars ); }).toThrowError( TypeError );
+					it("(null) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 0, null], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(true) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 0, true], maxChars ); }).toThrowError( TypeError );
+					it("(true) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 0, true], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(false) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 0, false], maxChars ); }).toThrowError( TypeError );
+					it("(false) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 0, false], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(NaN) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 0, NaN], maxChars ); }).toThrowError( TypeError );
+					it("(NaN) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 0, NaN], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("([]) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 0, []], maxChars ); }).toThrowError( TypeError );
+					it("([]) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 0, []], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("({}) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 0, {}], maxChars ); }).toThrowError( TypeError );
+					it("({}) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 0, {}], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("(1.1) it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 0, 1.1], maxChars ); }).toThrowError( TypeError );
+					it("(1.1) it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 0, 1.1], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
-					it("('test') it should throw an TYPE error", function () {
-						expect( function () { ps.getFragment( [0, 0, 'test'], maxChars ); }).toThrowError( TypeError );
+					it("('test') it should throw a TYPE error", function () {
+						expect( function () { ps.getFragment( [0, 0, 'test'], maxChars ); }).toThrowError( TypeError, /Was expecting/ );
 					});
 
 				});  // End 1st arg === [int, int, other]
@@ -1297,7 +1302,7 @@ describe("When a ProseStepper instance", function () {
 			describe("the 2nd argument is undefined,", function () {
 
 				it("it should not throw an error", function () {
-					expect( function () { ps.getFragment( step ); }).not.toThrowError( ReferenceError );
+					expect( function () { ps.getFragment( step ); }).not.toThrowError( ReferenceError, /Was expecting/ );
 				});
 
 			});
@@ -1305,44 +1310,44 @@ describe("When a ProseStepper instance", function () {
 
 			describe("the 2nd argument is not an integer > 0,", function () {
 
-				it(", `null`, it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( step, null ); }).toThrowError( TypeError );
+				it("`null`, it should throw a TYPE error.", function () {
+					expect( function () { ps.getFragment( step, null ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `true`, it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( step, true ); }).toThrowError( TypeError );
+				it("`true`, it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( step, true ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `false`, it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( step, false ); }).toThrowError( TypeError );
+				it("`false`, it should throw a TYPE error.", function () {
+					expect( function () { ps.getFragment( step, false ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `NaN`, it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( step, NaN ); }).toThrowError( TypeError );
+				it("`NaN`, it should throw a TYPE error.", function () {
+					expect( function () { ps.getFragment( step, NaN ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `{}`, it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( step, {} ); }).toThrowError( TypeError );
+				it("`{}`, it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( step, {} ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `[]`, it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( step, [] ); }).toThrowError( TypeError );
+				it("`[]`, it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( step, [] ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `0`, it should throw an TYPE error", function () {
-					expect( function () { ps.process( sentences, 0 ); }).toThrowError( RangeError );
+				it("`0`, it should throw a RANGE error", function () {
+					expect( function () { ps.getFragment( step, 0 ); }).toThrowError( RangeError, /Was expecting/ );
 				});
 
-				it(", `-1`, it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( step, -1 ); }).toThrowError( RangeError );
+				it("`-1`, it should throw a RANGE error", function () {
+					expect( function () { ps.getFragment( step, -1 ); }).toThrowError( RangeError, /Was expecting/ );
 				});
 
-				it(", `1.1`, it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( step, 1.1 ); }).toThrowError( TypeError );
+				it("`1.1`, it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( step, 1.1 ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `'[['text']]'`, it should throw an TYPE error", function () {
-					expect( function () { ps.getFragment( step, "[['text']]" ); }).toThrowError( TypeError );
+				it("`'[['text']]'`, it should throw a TYPE error", function () {
+					expect( function () { ps.getFragment( step, "[['text']]" ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
 			});  // End 2nd argument .getFragment()
@@ -1352,46 +1357,48 @@ describe("When a ProseStepper instance", function () {
 		// Takes: positive int > 0 or undefined
 		describe("for `.restart()`", function () {
 
-			describe("with argument that's not a positive int > 0", function () {  // (This passes in current version, needs fix)
+			beforeEach(function () { ps.process( sentences, maxChars ); })
 
-				it(", `null`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( null ); }).toThrowError( TypeError );
+			describe("with argument that's not a positive int > 0,", function () {  // (This passes in current version, needs fix)
+
+				it("`null`, it should throw a TYPE error", function () {
+					expect( function () { ps.restart( null ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `true`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( true ); }).toThrowError( TypeError );
+				it("`true`, it should throw a TYPE error", function () {
+					expect( function () { ps.restart( true ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `false`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( false ); }).toThrowError( TypeError );
+				it("`false`, it should throw a TYPE error", function () {
+					expect( function () { ps.restart( false ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `NaN`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( NaN ); }).toThrowError( TypeError );
+				it("`NaN`, it should throw a TYPE error", function () {
+					expect( function () { ps.restart( NaN ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `{}`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( {} ); }).toThrowError( TypeError );
+				it("`{}`, it should throw a TYPE error", function () {
+					expect( function () { ps.restart( {} ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `[]`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( [] ); }).toThrowError( TypeError );
+				it("`[]`, it should throw a TYPE error", function () {
+					expect( function () { ps.restart( [] ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `0`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( 0 ); }).toThrowError( RangeError );
+				it("`0`, it should throw a TYPE error", function () {
+					expect( function () { ps.restart( 0 ); }).toThrowError( RangeError, /Was expecting/ );
 				});
 
-				it(", `-1`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( -1 ); }).toThrowError( RangeError );
+				it("`-1`, it should throw a TYPE error", function () {
+					expect( function () { ps.restart( -1 ); }).toThrowError( RangeError, /Was expecting/ );
 				});
 
-				it(", `1.1`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( 1.1 ); }).toThrowError( TypeError );
+				it("`1.1`, it should throw a TYPE error", function () {
+					expect( function () { ps.restart( 1.1 ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `'[['text']]'`, it should throw an TYPE error", function () {
-					expect( function () { ps.restart( "[['text']]" ); }).toThrowError( TypeError );
+				it("`'[['text']]'`, it should throw a TYPE error", function () {
+					expect( function () { ps.restart( "[['text']]" ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
 			});  // End unexpected value
@@ -1401,46 +1408,46 @@ describe("When a ProseStepper instance", function () {
 		// Takes: positive int > 0
 		describe("for `.setMaxChars()`", function () {
 
-			describe("with argument that's not a positive int > 0", function () {  // (This passes in current version, needs fix)
+			describe("with argument that's not a positive int > 0,", function () {  // (This passes in current version, needs fix)
 
-				it(", `null`, it should throw an TYPE error", function () {
-					expect( function () { ps.setMaxChars( null ); }).toThrowError( TypeError );
+				it("`null`, it should throw a TYPE error", function () {
+					expect( function () { ps.setMaxChars( null ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `true`, it should throw an TYPE error", function () {
-					expect( function () { ps.setMaxChars( true ); }).toThrowError( TypeError );
+				it("`true`, it should throw a TYPE error", function () {
+					expect( function () { ps.setMaxChars( true ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `false`, it should throw an TYPE error", function () {
-					expect( function () { ps.setMaxChars( false ); }).toThrowError( TypeError );
+				it("`false`, it should throw a TYPE error", function () {
+					expect( function () { ps.setMaxChars( false ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `NaN`, it should throw an TYPE error", function () {
-					expect( function () { ps.setMaxChars( NaN ); }).toThrowError( TypeError );
+				it("`NaN`, it should throw a TYPE error", function () {
+					expect( function () { ps.setMaxChars( NaN ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `{}`, it should throw an TYPE error", function () {
-					expect( function () { ps.setMaxChars( {} ); }).toThrowError( TypeError );
+				it("`{}`, it should throw a TYPE error", function () {
+					expect( function () { ps.setMaxChars( {} ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `[]`, it should throw an TYPE error", function () {
-					expect( function () { ps.setMaxChars( [] ); }).toThrowError( TypeError );
+				it("`[]`, it should throw a TYPE error", function () {
+					expect( function () { ps.setMaxChars( [] ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `0`, it should throw an TYPE error", function () {
-					expect( function () { ps.setMaxChars( 0 ); }).toThrowError( RangeError );
+				it("`0`, it should throw a TYPE error", function () {
+					expect( function () { ps.setMaxChars( 0 ); }).toThrowError( RangeError, /Was expecting/ );
 				});
 
-				it(", `-1`, it should throw an TYPE error", function () {
-					expect( function () { ps.setMaxChars( -1 ); }).toThrowError( RangeError );
+				it("`-1`, it should throw a TYPE error", function () {
+					expect( function () { ps.setMaxChars( -1 ); }).toThrowError( RangeError, /Was expecting/ );
 				});
 
-				it(", `1.1`, it should throw an TYPE error", function () {
-					expect( function () { ps.setMaxChars( 1.1 ); }).toThrowError( TypeError );
+				it("`1.1`, it should throw a TYPE error", function () {
+					expect( function () { ps.setMaxChars( 1.1 ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
-				it(", `'[['text']]'`, it should throw an TYPE error", function () {
-					expect( function () { ps.setMaxChars( "[['text']]" ); }).toThrowError( TypeError );
+				it("`'[['text']]'`, it should throw a TYPE error", function () {
+					expect( function () { ps.setMaxChars( "[['text']]" ); }).toThrowError( TypeError, /Was expecting/ );
 				});
 
 			});  // End unexpected value
