@@ -2,31 +2,6 @@
 * 
 * Step back and forth through sentences and words
 * Also splits up the words into fragments if needed?
-* 
-* 
-* TODO:
-* - ??: Add stepping for paragraph?
-* - Reset values non-destructively
-* - Module just for navigating within arrays of arrays? (that can
-*   be changed?)
-* - ??: Allow -1 at the beginning of a sentenceArray to loop around
-*   to the end?
-* - ??: On frag increment, don't just stop at next word, keep
-*   iterating by the given frag change? Would fast-forwarding then
-*   give unexpected behavior?
-* - ??: Provide explicit way to get to beginning of current
-*   word? Current sentence?
-*       - ??: [0,0,0] === get current word means get current fragment? Or
-*           means get the start of the current word?
-* - ??: Same navigation for mid-word as mid-sentence? -1 means
-*   "if in middle, go back to start"?
-* - Determine maxChars assignment - can be set in `.getFragemnt()`
-*   (maybe too invisible), or must use explicit `.setMaxChars()`
-*   (kind of annoying)? Set in `.restart()` similarly? Required at
-*   `.process()`?
-* - Refactor `._stepFragment()` so that `.rawWord` isn't changed
-*   invisibly
-* - Don't hyphenate words under 4 letters???
 */
 
 (function (root, stepFactory) {  // root is usually `window`
@@ -46,8 +21,12 @@
 
     "use strict";
 
-    var ProseStepper = function () {
+    var ProseStepper = function ( state ) {
     /* ( {} ) -> ProseStepper
+    * 
+    * `state` is a reference to a never-destroyed object containing
+    * options for the word splitter, as well as for the ProseStepper
+    * instance itself.
     * 
     * Provides commands for getting the words/fragments passed into
     * its `.process()`. 
@@ -55,26 +34,26 @@
     */
         var pst = {};
 
-        pst.index    = 0;
+
+
+        // =====================================
+        // EXTERNAL
+        // =====================================
+        // TODO: Discuss external availability of these values
+
+        pst.index       = 0;
         pst.position    = [ 0, 0, 0 ];
         pst.rawWord     = null;
-        // `pst.splitWord` isn't just a string. It's not from the sentence/word
+        // `pst.fragments` isn't just a string. It's not from the sentence/word
         // array, it's a word once it has been fragmented into a list of strings
-        pst.splitWord   = null;  // [ Str ]
+        pst.fragments   = null;  // [ Str ]
 
 
-       // =====================================
-       // INTERNAL
-       // =====================================
 
-        pst._split      = split;  // func
-        pst._splitOpts  = { separator: '-' };
-
-        pst._progress   = 0;
-        var sentences   = pst._sentences = null;
-        var positions   = pst._positions = [];
-        
-        pst._maxChars;  // TODO: ??: Default or required argument? Default hides errors?
+        // =====================================
+        // INTERNAL
+        // =====================================
+        var sentences, positions;
 
 
 
@@ -82,16 +61,14 @@
        // SET UP NEW DATA
        // =====================================
 
-        pst.process = function ( sentenceArray, maxChars, splitterOptions ) {
-        /* 
-        * TODO: Some way to get maxChars out of here. Need it for
-        * establishing the first current word, which is needed
-        * for consistency with frags/pos[2]
+        pst.process = function ( sentenceArray ) {
+        /* ( [[Str]] ) -> ProseStepper
+        * 
+        * 
         */
-            ifNotArrayOfArraysOfStrings( sentenceArray );
+            notArrayOfArraysOfStringsErrors( sentenceArray );
 
-            pst.setMaxChars( maxChars )
-            pst._splitOpts = splitterOptions || pst._splitOpts;
+            pst._maxChars = pst._state.maxNumCharacters;
 
             sentences = pst._sentences = sentenceArray;  
             positions.splice( 0, positions.length );  // Empty non-destructively
@@ -103,27 +80,9 @@
                 }
             }
 
-            pst.restart( pst._maxChars )
+            pst.restart()
 
            return pst;
-        };
-
-
-        // ??: Should this even exist as its own thing?
-        pst.setMaxChars = function ( maxChars ) {
-        /* ( int > 0 ) -> ProseStepper
-        * 
-        * If the value is a positive integer > 0, it will be stored.
-        * Otherwise, an error will be thrown.
-        */
-            // If no established maxChars have to try
-            // or if new value for maxChars, have to try to assign
-            if ( !pst._maxChars || pst._maxChars !== maxChars ) {
-                ifNotPositiveInt( maxChars );
-                pst._maxChars = maxChars;  // Only store after error is avoided
-            }
-
-            return pst;
         };
 
 
@@ -146,29 +105,29 @@
         // =====================================
         // Traveling the words/sentences (for external use)
 
-        pst.restart = function ( maxChars ) {
+        pst.restart = function () {
             // ??: Return first fragment?
 
-            if ( maxChars !== undefined ) { pst.setMaxChars( maxChars ); }
+            pst._maxChars = pst._state.maxNumCharacters;
 
             pst.index    = 0;
             pst.position = [ 0, 0, 0 ];
 
             pst.rawWord     = pst._stepWord( pst.index );
-            pst.splitWord   = pst._split( pst.rawWord, pst._maxChars );
+            pst.fragments   = pst._split( pst.rawWord, pst._maxChars );
 
             return pst;
         };
 
 
-        pst.getFragment = function ( changesOrIndex, maxChars, splitterOptions ) {
+        pst.getFragment = function ( changesOrIndex ) {
         /* ( [int, int, int] or int ) -> Str
         * 
         * Currently it seems that only one of the ints can be something
         * other than 0.
         * TODO: Is another method ever needed? Find out.
         */
-            ifNotArrayOfIntsOrInt( changesOrIndex ); // Throw errors if needed
+            notArrayOfIntsOrIntErrors( changesOrIndex ); // Throw errors if needed
 
             var pos             = pst.position,
                 maxCharsChanged = false,
@@ -177,8 +136,8 @@
             // If maxChars is changed, store new value internally,
             // re-fragment word and start at the beginning of word
             // (TODO: or map current progress to new fragment array?)
-            if ( maxChars !== undefined && pst._maxChars !== maxChars ) {
-                pst.setMaxChars( maxChars );
+            if ( pst._maxChars !== state.maxNumCharacters ) {
+                pst._maxChars   = state.maxNumCharacters
                 maxCharsChanged = true;
             }
 
@@ -201,16 +160,15 @@
                 fragIndex = pos[2];
             } // end if index or which position changed
 
-            // In case rawWord has changed
-            pst._splitOpts = splitterOptions || pst._splitOpts;
-            pst.splitWord  = pst._split( pst.rawWord, pst._maxChars, pst._splitOpts );
+            // Get the array of strings that is the split word
+            pst.fragments = pst._getTheSplit();
 
             // If not a fragment change or if maxChars was changed,
             // negating the validity of old fragment positions
             if ( maxCharsChanged ) { pos[2] = 0; }
             else { pos[2] = fragIndex }
             
-            var frag = pst.splitWord[ pos[2] ];
+            var frag = pst.fragments[ pos[2] ];
             return frag;
         }  // End pst.getFragment()
 
@@ -219,6 +177,31 @@
         // =====================================
         // TRAVEL INTERNAL HELPERS
         // =====================================
+
+        pst._getTheSplit = function () {
+        /* ( None ) -> [ Str ]
+        * 
+        * Uses all internal stuff to split the `.rawWord` and return
+        * it as an array of strings.
+        */
+            // Values for splitter
+            var sep = pst._state.separator;
+            // ??: Set back to default if state has invalid value?
+            if ( lengthIsValid( state.minLengthForSeparator ) ) {
+                pst._minLengthForSeparator = state.minLengthForSeparator;  // ??: || 3?
+            }
+
+            if ( pst._maxChars < pst._minLengthForSeparator ) { sep = ''; }
+
+            var toPass = {
+                separator: sep,
+                fractionOfMax: pst._state.fractionOfMax,
+                redistribute: pst._state.redistribute
+            }
+
+            return pst._split( pst.rawWord, pst._maxChars, toPass );
+        };  // End pst._getTheSplit()
+
 
         pst._indexJump = function ( index ) {
         /* ( int ) -> Str
@@ -251,7 +234,7 @@
             // if current fragment starts new word
             // Note: doesn't skip more than one word at a time and starts
             // at the beginning of the next word, no matter the step value
-            if ( fragi >= pst.splitWord.length ) {
+            if ( fragi >= pst.fragments.length ) {
                 pst.rawWord = pst._stepWord( pst.index + 1 );
             
             } else if (fragi < 0) {
@@ -374,13 +357,28 @@
         // ERRORS
         // =====================================
 
-        var ifNotArrayOfArraysOfStrings = function ( arg ) {
+        var lengthIsValid = function ( arg ) {
+        /* ( int ) -> True or throw error
+        * 
+        * Will throw necessary errors for bad references or things that
+        * aren't ints or arrays of ints. Otherwise, will return `true`
+        */
+            var msg = 'Was expecting an array of integers. Recieved: ' + arg + ', an ' + Object.prototype.toString.call( arg );
+
+            if ( arg === undefined || arg === null ) { return false; }
+            if ( !isInt( arg ) ) { throw new TypeError( msg ) }
+
+            // Otherwise, we're cool
+            return true;
+        };  // End lengthIsValid()
+
+
+        var notArrayOfArraysOfStringsErrors = function ( arg ) {
         /* ( [[str]] ) -> True or throw error
         * 
         * Will throw necessary errors for bad references or things that
         * aren't arrays of arrays of strings. Otherwise, will return `true`
         */
-
             var msg = 'Was expecting an array of array of strings. Recieved: ' + arg + ', an ' + Object.prototype.toString.call( arg );
 
             if ( arg === undefined ) { throw new ReferenceError( msg ); }
@@ -399,10 +397,10 @@
             }
             
             return true;
-        };  // End ifNotArrayOfArraysOfStrings()
+        };  // End notArrayOfArraysOfStringsErrors()
 
 
-        var ifNotArrayOfIntsOrInt = function ( arg ) {
+        var notArrayOfIntsOrIntErrors = function ( arg ) {
         /* ( int || [ int ] ) -> True or throw error
         * 
         * Will throw necessary errors for bad references or things that
@@ -418,7 +416,8 @@
 
             try { arg[0] } catch (err) { throw new TypeError( msg ) }
 
-            // no errors on [0, 0, 0]
+            // Otherwise, things like `true` pass. Can't just if( arg[0] )
+            // because then [0, 0, 0] wouldn't get through
             if ( !isInt( arg[0] ) ) { throw new TypeError( msg ) }
 
             for (var itemi = 0; itemi < arg.length; itemi++) {
@@ -428,34 +427,42 @@
             }
             // Otherwise, we're cool
             return true;
-        };  // End ifNotArrayOfInts
+        };  // End notArrayOfIntsOrIntErrors()
 
 
-        var ifNotPositiveInt = function ( arg ) {
-        /* ( int > 0 ) -> True or throw error
+
+        // =====================================
+        // INITIALIZE
+        // =====================================
+        pst.init = function ( state ) {
+        /* ( {} ) -> ProseStepper
         * 
-        * Will throw necessary errors for bad references or non-numbers.
-        * Otherwise, will return `true`
+        * Now that functions exist, use them to check and set
+        * values
         */
-            var msg = 'Was expecting positive integer > 0. Recieved: ' + arg + ', an ' + Object.prototype.toString.call( arg );
-
-            if ( arg === undefined ) {
-                throw new ReferenceError( msg );
-            } else if ( !isInt( arg ) ) {
-                throw new TypeError( msg );
-            } else if ( !(arg > 0) ) {
-                throw new RangeError( msg );
+            pst._state      = state;
+            pst._split      = split;  // func
+            pst._maxChars   = state.maxNumCharacters;
+            // Minimum number of letters required to include a separator
+            pst._minLengthForSeparator = 3;
+            if ( lengthIsValid( state.minLengthForSeparator ) ) {
+                pst._minLengthForSeparator = state.minLengthForSeparator;
             }
-            // Otherwise, we're cool
-            return true;
-        };  // End ifNotPositiveInt()
+
+            pst._progress   = 0;
+            sentences       = pst._sentences = null;
+            positions       = pst._positions = [];
+
+            return pst;
+        };  // End pst.init()
 
 
 
-       // =====================================
-       // DONE
-       // =====================================
+        // =====================================
+        // DONE
+        // =====================================
 
+        pst.init( state );
         return pst;
     };  // End ProseStepper() -> {}
 
