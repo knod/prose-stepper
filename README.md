@@ -164,6 +164,9 @@ With a bit of adjustment, you can get some different behavior.
 // ================================
 // CUSTOM `state` VALUES
 // ================================
+// Note: When you change `state` or `state` values, your current
+// word gets reset to the start. See the example below.
+
 var state      = { maxNumCharacters: 5 },
     ps2        = new ProseStepper( state ),
     sentences2 = [ [ 'Victorious,', 'you', 'brave', 'flag.' ] ];
@@ -172,8 +175,10 @@ ps2.process( sentences2 );
 
 var one2 = ps2.getFragment( [0, 0, 0] );  // 'Vict-'
 
+// Note the reset here to the beginning of the word despite
+// a fragment delta of 1
 state.separator = '%';
-var two2 = ps2.getFragment( [0, 0, 1] );  // 'orio%'
+var two2 = ps2.getFragment( [0, 0, 1] );  // 'Vict%'
 ```
 
 ## Other Operations
@@ -182,7 +187,10 @@ var two2 = ps2.getFragment( [0, 0, 1] );  // 'orio%'
 // RESTART
 // ================================
 // Go back to the beginning of the text
-ps.restart()
+ps2.getFragment( 5 )
+ps2.restart()
+// Get current fragment
+var three2 = ps2.getFragment( [0, 0, 0] );  // 'Vict%'
 
 
 // ================================
@@ -191,13 +199,13 @@ ps.restart()
 
 // A fraction between 0 and 1 inclusive representing where in the
 // text you are. 0 is at the very start, 1 means you're at the end
-ps.getProgress()
+var progress = ps2.getProgress();  // 0
 
 // The number of words in the text collection
-ps.getLength()
+var length = ps2.getLength();  // 4
 
 // The number of the word you're currently at
-ps.getIndex()
+var index = ps2.getIndex();  // 0
 
 
 // ================================
@@ -206,7 +214,9 @@ ps.getIndex()
 
 // Change the state object being used as a reference
 var newState = { maxNumCharacters: 200 }
-ps.setState( newState );
+ps2.setState( newState );
+// Note: This will also reset to the start of the current word
+var two2 = ps2.getFragment( [0, 0, 1] );  // 'Victorious,'
 ```
 
 
@@ -224,7 +234,7 @@ Bug reports welcome. File bugs in the repo's issue tracker at [https://github.co
 ## Ideas/Developing
 Also post ideas about behavior, or whatever else, in the repo's issue tracker at [https://github.com/knod/prose-stepper/issues](https://github.com/knod/prose-stepper/issues).
 
-Pull requests are welcome, though I've got limited time to manage them. If you want to play with the code, fork the repo, clone it to your local machine, open the root directory of the repo in your terminal, and run `npm install`. Please run `npm test` before submitting pull requests to make sure all the tests still pass. If you're changing behavior please add new tests or test files and adjust the README and the index.html page to reflect your changes (and don't forget to bump the version).
+Pull requests are welcome, though I've got limited time to manage them. If you want to play with the code, fork the repo, clone it to your local machine, open the root directory of the repo in your terminal, and run `npm install`. Please run `npm test` before submitting pull requests to make sure all the tests still pass. If you're changing behavior please add new tests or test files (this project uses the jasmine package for testing) and adjust the README and the index.html page to reflect your changes (and don't forget to bump the version).
 
 
 # License
