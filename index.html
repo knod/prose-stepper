@@ -11,30 +11,125 @@
 	<script src="node_modules/@knod/hyphenaxe/lib/hyphenaxe.js"></script>
 	<script src="dist/prose-stepper.js"></script>
 	<script>
-		var ps 		  = new ProseStepper( { maxNumCharacters: 5 } ),
-			sentences = [  ['Victorious,','you','brave','flag.'], ['Delirious,','I','come','back.'], ['\n'], ['Why,','oh','walrus?'] ];
 
-		ps.process( sentences );
-			
-		var frag1 = ps.getFragment( [0, 0, 1] ),
-			frag2 = ps.getFragment( [0, 0, 1] ),
-			frag3 = ps.getFragment( [0, 1, 0] ),
-			frag4 = ps.getFragment( [1, 0, 0] ),
-			frag5 = ps.getFragment( [0, 1, 0] );
-		console.log('1:', frag1, frag2, frag3, frag4, frag5);
+		var ps1 = new ProseStepper()
+
+		// ================================
+		// DATA
+		// ================================
+		// Prose-Stepper needs an array of arrays of strings to traverse
+		var sentences = [ 
+			[ 'Victorious,', 'you','brave', 'flag.' ],
+			[ 'Delirious,', 'I', 'come', 'back.' ],
+			[ '\n' ],
+			[ 'Why,', 'oh', 'walrus?' ]
+		];
+
+		// ================================
+		// PROCESSING
+		// ================================
+		// Then warm it up by letting it munch on that data
+		ps1.process( sentences );
+
+		// ================================
+		// STEPPING
+		// ================================
+		// prose-stepper's `.getFragment()` can take an array with three
+		// integers - a vector with three deltas. That is, an array with
+		// three values that each indicate a direction and a distance to
+		// travel within each array. At the moment, only one of the deltas can
+		// be active at a time. The other's all have to be 0.
+
+		// All 0's will get you the current fragment. Result at the very start:
+		var one = ps1.getFragment( [0, 0, 0] );  // 'Victorious,'
+		console.log( '1:', one, one === 'Victorious,' );
+
+		// The first integer will move to the start of the next sentence.
+		var two = ps1.getFragment( [1, 0, 0] );  // 'Delirious,'
+		console.log( '2:', two, two === 'Delirious,' );
+
+		// The second integer will move to the start of the next word.
+		var three = ps1.getFragment( [0, 1, 0] );  // 'I'
+		console.log( '3:', three, three === 'I' );
+
+		// The third integer will move forward one fragment. At the end of a word
+		// it will move to the next word.
+		var four = ps1.getFragment( [0, 0, 1] );  // 'come'
+		console.log( '4:', four, four === 'come' );
+
+		// At the moment, fragments can only move forward one word at a time
+		// maximum.
+		var five = ps1.getFragment( [0, 0, 5] );  // 'back.'
+		console.log( '5:', five, five === 'back.' );
+
+		// You can move backwards too
+		var six = ps1.getFragment( [0, 0, -1] );  // 'come'
+		console.log( '6:', six, six === 'come' );
+
+		// Word deltas can cross sentence boundries
+		var seven = ps1.getFragment( [0, -3, 0] );  // 'flag.'
+		console.log( '7:', seven, seven === 'flag.' );
+
+		// You can take multiple steps at a time with sentences...
+		var eight = ps1.getFragment( [3, 0, 0] );  // 'Why,'
+		console.log( '8:', eight, eight === 'Why,' );
+
+		// ...and with words, forwards and backwards
+		var nine = ps1.getFragment( [0, -7, 0] );  // 'brave'
+		console.log( '9:', nine, nine === 'brave' );
+
+		// With stepping, you can't before the first word...
+		var ten = ps1.getFragment( [-100, 0, 0] );  // 'Victorious,'
+		console.log( '10:', ten, ten === 'Victorious,' );
+
+		// ...or past the last one
+		var eleven = ps1.getFragment( [100, 0, 0] );  // 'walrus?'
+		console.log( '11:', eleven, eleven === 'walrus?' );
+
+		// In the middle of a sentence, a sentence delta of -1
+		// will go to the start of the current sentence
+		var twelve = ps1.getFragment( [-1, 0, 0] );  // 'Why,'
+		console.log( '12:', twelve, twelve === 'Why,' );
 
 
-		var ps2 	  = new ProseStepper( {maxNumCharacters: 5, minSeparatorLength: 6 } ),
-			sentences = [  ['Victorious,','you','brave','flag.'], ['Delirious,','I','come','back.'], ['\n'], ['Why,','oh','walrus?'] ];
+		// ================================
+		// JUMPING
+		// ================================
+		// prose-stepper's `.getFragment()` can also take a positive
+		// or negative integer.
 
-		ps2.process( sentences );
-			
-		frag1 = ps2.getFragment( [0, 0, 1] );
-		frag2 = ps2.getFragment( [0, 0, 1] );
-		frag3 = ps2.getFragment( [0, 1, 0] );
-		frag4 = ps2.getFragment( [1, 0, 0] );
-		frag5 = ps2.getFragment( [0, 1, 0] );
-		console.log('2:', frag1, frag2, frag3, frag4, frag5);
+		// Jump to any position in the text as if it were a flat array
+		var thirtn = ps1.getFragment( 10 );  // 'oh'
+		console.log( '13:', thirtn, thirtn === 'oh' );
+
+		// Negative integers will loop and get stuff from the end of the
+		// collection
+		var fourtn = ps1.getFragment( -3 );  // 'Why,'
+		console.log( '14:', fourtn, fourtn === 'Why,' );
+
+		// Integers past the end of the collection... well, that behavior
+		// hasn't been decided yet. Currently, that just gives the
+		// last word.
+		var fiftn = ps1.getFragment( 20 );  // 'walrus?'
+		console.log( '15:', fiftn, fiftn === 'walrus?' );
+
+
+		// ================================
+		// CUSTOM `state` VALUES
+		// ================================
+		var state = { maxNumCharacters: 5 },
+			ps2 = new ProseStepper( state ),
+			sentences2 = [ [ 'Victorious,', 'you', 'brave', 'flag.' ] ];
+
+		ps2.process( sentences2 );
+
+		var one2 = ps2.getFragment( [0, 0, 0] );  // 'Vict-'
+		console.log( '1(2):', one2, one2 === 'Vict-' );
+
+		state.separator = '%';
+		var two2 = ps2.getFragment( [0, 0, 1] );  // 'orio%'
+		console.log( '2(2):', two2, two2 === 'orio%' );
+
 	</script>
 </body>
 </html>
