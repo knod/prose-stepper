@@ -40,11 +40,22 @@ describe("When a ProseStepper instance", function () {
 			
 			beforeEach( function () {
 				ps = new ProseStepper();
-				ps.process( sentences )
+				ps.process( sentences );
 			});
 
 			it("should use its defaults", function () {
-				expect( ps.getFragment( [0, 0, 0] )).toEqual( 'Victorious,')
+				expect( ps.getFragment( [0, 0, 0] )).toEqual( 'Victorious,');
+			});
+
+			describe("and then `.setState()` is used to reference an object", function () {
+
+				it("should save and use the new state object.", function () {
+					var newState = { maxNumCharacters: 5 };
+					ps.setState( newState );
+					expect( ps.getFragment( [0, 0, 0] )).toEqual( 'Vict-');
+					expect( ps._state ).toBe( newState );
+				});
+
 			});
 
 		});
@@ -107,8 +118,6 @@ describe("When a ProseStepper instance", function () {
 					expect( ps.getFragment( [1, 0, -1] )).toEqual( result );  // same as [1, 0,  0]
 				});
 
-				xit("Sentence delta greater than number of sentences")
-
 				describe("and then asked for the current fragment", function () {
 					// Explicit retention tests
 					it("should retain the mid-text sentence position.", function () {
@@ -155,8 +164,7 @@ describe("When a ProseStepper instance", function () {
 
 			describe("more sentences than exist", function () {
 
-				xit("should return the last fragment in the last word?")
-
+				// TODO: Discuss behavior - should return the last fragment in the last word?
 				it("it should return the 1st fragment in the last word in the last sentence.", function () {
 					var result = 'walr-';
 					expect( ps.getFragment( [5, 0, 0] )).toEqual( result );
@@ -264,8 +272,7 @@ describe("When a ProseStepper instance", function () {
 
 			describe("more words than exist", function () {
 
-				xit("should return the last fragment in the last word?")
-
+				// TODO: Discuss behavior - should return the last fragment in the last word?
 				it("should return the 1st fragment in the last word in the last sentence.", function () {
 					var result = 'walr-';
 					expect( ps.getFragment( [0, 100, 0] )).toEqual( result );
@@ -815,7 +822,17 @@ describe("When a ProseStepper instance", function () {
 
 			});
 
-			xit("Jump past end, back at start? Error? Undefined...? last word? last fragment?")
+			// TODO: Discuss behavior - Jump past end, back at start? Error? Undefined...? last word? last fragment?
+			describe("of 100, in the 12 word collection, should get the 12th word", function () {
+				
+				it("when starting at the start of the collection.", function () {
+					var result = 'walr-';
+					expect( ps.getFragment( 0 ) ).toEqual( 'Vict-' );
+					expect( ps.getFragment( 100 ) ).toEqual( result );
+					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
+				});
+
+			});
 
 		});  // End call `.getFragment()` using an index number
 
@@ -886,9 +903,39 @@ describe("When a ProseStepper instance", function () {
 		});  // End `.get` progress, index, and length for length 12 collection
 
 
-		// --- `.minLengthForSeparator` ---
+		// --- `state` ---
+		describe("and, mid-multi-fragment-word, a `state` property values is changed,", function () {
 
-		// --- Default `state.minLengthForSeparator` ---
+			it("`.separator`, it should restart the word, getting the first fragment.", function () {
+				expect( ps.getFragment( [0, 0, 1] )).toEqual('orio-');
+				state.separator = '%%%%';
+				expect( ps.getFragment( [0, 0, 1], true )).toEqual('V%%%%');
+			});
+
+			it("`.minLengthForSeparator`, it should restart the word, getting the first fragment.", function () {
+				expect( ps.getFragment( [0, 0, 1] )).toEqual('orio-');
+				state.minLengthForSeparator = 8;
+				expect( ps.getFragment( [0, 0, 1] )).toEqual('Vict');
+			});
+
+			it("`.fractionOfMax`, it should restart the word, getting the first fragment.", function () {
+				expect( ps.getFragment( [0, 0, 1] )).toEqual('orio-');
+				state.fractionOfMax = 1;
+				expect( ps.getFragment( [0, 0, 1] )).toEqual('Vic-');
+			});
+
+			it("`.maxNumCharacters`, it should restart the word, getting the first fragment.", function () {
+				expect( ps.getFragment( [0, 0, 1] )).toEqual('orio-');
+				state.maxNumCharacters = 3;
+				expect( ps.getFragment( [0, 0, 1] )).toEqual('Vi-');
+			});
+
+			// TODO: test `.redistribute` too
+
+		});  // End mid-multi-fragment-word state change
+
+
+		// --- Default `state.maxNumCharacters` ---
 		describe("and its maximum characters is changed to something less than 3", function () {
 
 			it("because of it's `._minLengthForSeparator` it should not include a hyphen in the result.", function () {
@@ -899,8 +946,6 @@ describe("When a ProseStepper instance", function () {
 
 		});
 
-		xit("and its `state.separator` is changed to something with more characters...?")
-		xit("and its `.setState` is used with valid and invalid values...?")
 
 		// --- Custom `state.minLengthForSeparator` ---
 		describe("and its `state`s `.minLengthForSeparator` is changed to", function () {
@@ -949,6 +994,17 @@ describe("When a ProseStepper instance", function () {
 			});
 
 		});  // End Custom `state.minLengthForSeparator`
+
+		describe("and a new `state` is set with `.setState()`", function () {
+
+			it("it should start at the beginning of the current word and use the new state object.", function () {
+				expect( ps.getFragment( [0, 0, 1] )).toEqual('orio-');
+				var newState = { maxNumCharacters: 8 }
+				ps.setState( newState );
+				expect( ps.getFragment( [0, 0, 1] )).toEqual('Victo-');
+			});
+
+		});
 
 	});  // End expected values
 
@@ -1272,7 +1328,6 @@ describe("When a ProseStepper instance", function () {
 
 		});  // End .getFragment()
 
-		// `state`
 
 		// --- `state.minLengthForSeparator` ---
 		// --- takes undefined or positive int ---
@@ -1283,51 +1338,62 @@ describe("When a ProseStepper instance", function () {
 			// undefined or any integer is fine
 
 			it("`null`, it should throw a TYPE error", function () {
-			state.minLengthForSeparator = null;
+				state.minLengthForSeparator = null;
 				expect( function () { ps.getFragment( step ); }).toThrowError( TypeError, /Was expecting/ );
 			});
 
 			it("`true`, it should throw a TYPE error", function () {
-			state.minLengthForSeparator = true;
+				state.minLengthForSeparator = true;
 				expect( function () { ps.getFragment( step ); }).toThrowError( TypeError, /Was expecting/ );
 			});
 
 			it("`false`, it should throw a TYPE error.", function () {
-			state.minLengthForSeparator = false;
+				state.minLengthForSeparator = false;
 				expect( function () { ps.getFragment( step ); }).toThrowError( TypeError, /Was expecting/ );
 			});
 
 			it("`NaN`, it should throw a TYPE error.", function () {
-			state.minLengthForSeparator = NaN;
+				state.minLengthForSeparator = NaN;
 				expect( function () { ps.getFragment( step ); }).toThrowError( TypeError, /Was expecting/ );
 			});
 
 			it("`{}`, it should throw a TYPE error", function () {
-			state.minLengthForSeparator = {};
+				state.minLengthForSeparator = {};
 				expect( function () { ps.getFragment( step ); }).toThrowError( TypeError, /Was expecting/ );
 			});
 
 			it("`[]`, it should throw a TYPE error", function () {
-			state.minLengthForSeparator = [];
+				state.minLengthForSeparator = [];
 				expect( function () { ps.getFragment( step ); }).toThrowError( TypeError, /Was expecting/ );
 			});
 
 			it("`[5]`, it should throw a TYPE error", function () {
-			state.minLengthForSeparator = [5];
+				state.minLengthForSeparator = [5];
 				expect( function () { ps.getFragment( step ); }).toThrowError( TypeError, /Was expecting/ );
 			});
 
 			it("`1.1`, it should throw a TYPE error", function () {
-			state.minLengthForSeparator = 1.1;
+				state.minLengthForSeparator = 1.1;
 				expect( function () { ps.getFragment( step ); }).toThrowError( TypeError, /Was expecting/ );
 			});
 
 			it("`'text'`, it should throw a TYPE error", function () {
-			state.minLengthForSeparator = 'text';
+				state.minLengthForSeparator = 'text';
 				expect( function () { ps.getFragment( step ); }).toThrowError( TypeError, /Was expecting/ );
 			});
 
 		});  // End invalid `state.minLengthForSeparator`
+
+
+		// --- `.setState()` ---
+		describe("when `.setState()` is used with", function () {
+
+			it("`.minLengthForSeparator` with `null`, it should throw a TYPE error (basically all the same errors incorrect values should throw anytime).", function () {
+				var newState = { minLengthForSeparator: null };
+				expect( function () { ps.setState( newState ); }).toThrowError( TypeError, /Was expecting/ );
+			});
+
+		});
 
 	});  // End Unexpected Values
 

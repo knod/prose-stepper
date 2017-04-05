@@ -59,6 +59,10 @@
             maxNumCharacters: 13,
             minLengthForSeparator: 3,
         };
+        var oldState,
+            stateChanged = false,
+            relevantProps = [ 'maxNumCharacters', 'minLengthForSeparator',
+                            'separator', 'fractionOfMax', 'redistribute' ];
 
 
 
@@ -69,11 +73,12 @@
         pst.process = function ( sentenceArray ) {
         /* ( [[Str]] ) -> ProseStepper
         * 
-        * 
+        * Creates maps/arrays that will be used to jump around
         */
             notArrayOfArraysOfStringsErrors( sentenceArray );
 
-            sentences = pst._sentences = sentenceArray;  
+            // Store clone of array. Can't handle changes atm.
+            sentences = pst._sentences = sentenceArray.slice(0);  
             positions.splice( 0, positions.length );  // Empty non-destructively
 
             for ( let senti = 0; senti < sentences.length; senti++ ) {
@@ -83,7 +88,7 @@
                 }
             }
 
-            pst.restart()
+            pst.restart();
 
            return pst;
         };
@@ -111,26 +116,22 @@
         pst.setState = function ( newState ) {
         /* ( {} ) -> ProseStepper
         * 
-        * Be careful, this is not where the errors will happen
-        * yet.
+        * Be careful, this is not where most of the errors will
+        * happen. Some won't happen till you try to run stuff
+        * (some happen in the splitter).
         */
-            pst._state = newState;
+            handleStateChange( newState );
             return pst;
-        };
+        };  // End pst.setState()
 
 
         pst.restart = function () {
-            // ??: Return first fragment?
-
-            pst._oldMaxChars = getStateProp( 'maxNumCharacters' );
-            // TODO: instead, store JSON state and compare to new JSON state?
-            // Any change will require adjustments
-
+        // ??: Return first fragment?
             pst.index    = 0;
             pst.position = [ 0, 0, 0 ];
 
-            pst.rawWord     = pst._stepWord( pst.index );
-            pst.fragments   = pst._split( pst.rawWord, getStateProp( 'maxNumCharacters' ) );
+            pst.rawWord   = pst._stepWord( pst.index );
+            pst.fragments = pst._split( pst.rawWord, getStateProp( pst._state, 'maxNumCharacters' ) );
 
             return pst;
         };
@@ -139,26 +140,22 @@
         pst.getFragment = function ( changesOrIndex ) {
         /* ( [int, int, int] or int ) -> Str
         * 
-        * Currently it seems that only one of the ints can be something
-        * other than 0.
+        * Only one of the ints can be something other than 0.
         * TODO: Is another method ever needed? Find out.
+        * 
+        * This thing is complicated. See the README.
         */
             notArrayOfIntsOrIntErrors( changesOrIndex ); // Throw errors if needed
 
             var pos             = pst.position,
-                // TODO: If any state change, probably need to re-split word
-                maxCharsChanged = false,
                 fragIndex       = 0;
 
-            // If maxChars is changed, store new value internally,
+            // If state is changed, store new value internally,
             // re-fragment word and start at the beginning of word
-            // (TODO: or map current progress to new fragment array?)
-            if ( pst._oldMaxChars !== getStateProp( 'maxNumCharacters' ) ) {
-                pst._oldMaxChars = getStateProp( 'maxNumCharacters' );
-                maxCharsChanged  = true;
-            }
+            // Will set stateChanged to `true` if necessary
+            stateChanged = handleStateChange( pst._state )
 
-            // if plain index change/jump
+            // Plain index change/jump
             if ( typeof changesOrIndex === 'number' ) {
                 pst.rawWord = pst._indexJump( changesOrIndex );
 
@@ -180,10 +177,14 @@
             // Get the array of strings that is the split word
             pst.fragments = pst._getTheSplit();
 
-            // If not a fragment change or if maxChars was changed,
-            // negating the validity of old fragment positions
-            if ( maxCharsChanged ) { pos[2] = 0; }
-            else { pos[2] = fragIndex }
+            // If any state property was changed, the old fragment
+            // position's should be reset. Things have changed!
+            if ( stateChanged ) {
+                pos[2] = 0;
+                stateChanged = false;  // Reset for next time
+            } else {
+                pos[2] = fragIndex;
+            }
 
             var frag = pst.fragments[ pos[2] ];
             return frag;
@@ -202,14 +203,14 @@
         * it as an array of strings.
         */
             // Values for splitter
-            var sep = getStateProp( 'separator' );
-            var maxChars = getStateProp( 'maxNumCharacters' );
-            if ( maxChars < getStateProp( 'minLengthForSeparator' ) ) { sep = ''; }
+            var sep = getStateProp( pst._state, 'separator' );
+            var maxChars = getStateProp( pst._state, 'maxNumCharacters' );
+            if ( maxChars < getStateProp( pst._state, 'minLengthForSeparator' ) ) { sep = ''; }
 
             var toPass = {
                 separator: sep,
-                fractionOfMax: getStateProp( 'fractionOfMax' ),
-                redistribute: getStateProp( 'redistribute' )
+                fractionOfMax: getStateProp( pst._state, 'fractionOfMax' ),
+                redistribute: getStateProp( pst._state, 'redistribute' )
             }
 
             return pst._split( pst.rawWord, maxChars, toPass );
@@ -219,8 +220,10 @@
         pst._indexJump = function ( index ) {
         /* ( int ) -> Str
         * 
-        * Circle to the end if the index is negative, return
-        * a new word.
+        * Return a word at that "index" as if the collection were flat.
+        * Circle to the end of the collection if the index is negative.
+        * Don't ever go past the end of the collection (behavior being
+        * debated).
         */
             // act like array indexes - negative numbers come back from the end
             if ( index < 0 ) { index = pst.getLength() + index; }
@@ -277,7 +280,12 @@
 
 
         pst._stepWord = function ( index ) {
-        // ( int ) -> [ Str ]
+        /* ( int ) -> [ Str ]
+        * 
+        * Return a string that is the word at that `index` position.
+        * A ton of things use this.
+        * ??: Name? jumpWord, getWord, other?
+        */
             pst.index       = pst.normalizeIndex( index );
             var pos         = positions[ pst.index ];
             pst.position[0] = pos[0];
@@ -288,7 +296,11 @@
 
 
         pst._stepSentence = function ( sentenceChange ) {
-        // ( int ) -> Int
+        /* ( int ) -> Str
+        * 
+        * Return a string that is the word reached with that
+        * `sentenceChange`. Some more details are in the README
+        */
             if ( sentenceChange === 0 ) { return 0; }
 
             var pos     = [ pst.position[0], pst.position[1] ],
@@ -359,12 +371,13 @@
        // =====================================
 
         var signOf = function ( num ) {
+        // Returns 1 or -1 depending on the positivity or negativity of `num`
             return typeof num === 'number' ? num ? num < 0 ? -1 : 1 : num === num ? num : NaN : NaN;
         }
 
         var isInt = function ( arg ) {
             return ( typeof arg === 'number' ) && !isNaN( arg ) && ( arg % 1 === 0 )
-        };  // End isInt()
+        };
 
         pst.normalizeIndex = function ( index ) {
         /* Don't go out of the array */
@@ -378,22 +391,78 @@
         };
 
 
+        var handleStateChange = function ( testState ) {
+        /* ( {} ) -> Bool
+        * 
+        * If `testState` has different values for relevant properties
+        * than the current state, return `true`, otherwise `false`.
+        */
+            var changed;
+
+            for ( let propi = 0; propi < relevantProps.length; propi++ ) {
+                
+                let prop = relevantProps[ propi ]
+
+                if ( oldState && testState && oldState[ prop ] !== testState[ prop ] ) {
+                    stateChanged = true;
+                    // Trigger any errors if necessary
+                    getStateProp( testState, prop );
+                    // ??: Do this here, or after it's all over? Will
+                    // changing some of them mess stuff up if a later one
+                    // throws an error?
+                    // oldState[ prop ] = testState[ prop ];
+                }
+            }
+
+            if ( stateChanged ) {
+                pst._state = testState;  // May just equal itself most times
+                setOldState( pst._state );  // Reset for next time
+            }
+
+            return stateChanged;
+        };  // End handleStateChange();
+
+
+        var setOldState = function ( newState ) {
+        /* ( {} ) -> other {}
+        * 
+        * Create and return a new `oldState` object. Future state
+        * changes will be compared to this old version. Can't just
+        * do `oldState` = `newState`, because then if the `newState`s
+        * properties change, so will `oldState`s and no change will
+        * be detected.
+        */
+            oldState = {};
+            for ( let propi = 0; propi < relevantProps.length; propi++ ) {
+                let prop = relevantProps[ propi ]
+                if ( newState ) { oldState[ prop ] = newState[ prop ]; }
+            }
+            return oldState;
+        };  // End setOldState()
+
+
 
         // =====================================
         // ERRORS
         // =====================================
 
-        var getStateProp = function ( propName ) {
+        var getStateProp = function ( state, propName ) {
         /* ( str ) -> Various
         * 
-        * Either get a property from pst._state, return a default
-        * value, or throw an error.
+        * Either get a property from `state`, return a default
+        * value, or throw an error. We'll trigger any errors
+        * we can, but some of these only error in the splitter
         */
             var val = null;
 
-            if ( pst._state ) {
+            if ( state ) {
+
                 var funcName = '_getValid_' + propName;
-                val = pst[ funcName ]( pst._state[ propName ] );
+                // In case there are properties on state that aren't relevant
+                if ( pst[ funcName ] ) {
+                    val = pst[ funcName ]( state[ propName ] );
+                }
+                
             } else {
                 val = defaults[ propName ];
             }
@@ -418,7 +487,10 @@
             return arg;
         };  // End pst._getValid_minLengthForSeparator()
 
+
         // ---- Splitter values ----
+        // TODO: Some way to use splitter's error checking?
+
         // All defaults are valid values for the splitter
         // Otherwise, invalid values will be handled by the splitter
         pst._getValid_maxNumCharacters = function ( val ) { return val || defaults.maxNumCharacters; }
@@ -499,9 +571,8 @@
         */
             pst._split = split;  // func
 
-            pst._state       = state;
-            pst._oldMaxChars = getStateProp( 'maxNumCharacters' );
-            pst._minLengthForSeparator = getStateProp( 'minLengthForSeparator' );
+            pst._state = state;
+            setOldState( state );
 
             pst._progress   = 0;
             sentences       = pst._sentences = null;
