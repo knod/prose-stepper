@@ -54,6 +54,11 @@
         // INTERNAL
         // =====================================
         var sentences, positions;
+        // Just the required stuff. Other stuff can be undefined.
+        var defaults = {
+            maxNumCharacters: 13,
+            minLengthForSeparator: 3,
+        };
 
 
 
@@ -67,8 +72,6 @@
         * 
         */
             notArrayOfArraysOfStringsErrors( sentenceArray );
-
-            pst._maxChars = pst._state.maxNumCharacters;
 
             sentences = pst._sentences = sentenceArray;  
             positions.splice( 0, positions.length );  // Empty non-destructively
@@ -105,16 +108,29 @@
         // =====================================
         // Traveling the words/sentences (for external use)
 
+        pst.setState = function ( newState ) {
+        /* ( {} ) -> ProseStepper
+        * 
+        * Be careful, this is not where the errors will happen
+        * yet.
+        */
+            pst._state = newState;
+            return pst;
+        };
+
+
         pst.restart = function () {
             // ??: Return first fragment?
 
-            pst._maxChars = pst._state.maxNumCharacters;
+            pst._oldMaxChars = getStateProp( 'maxNumCharacters' );
+            // TODO: instead, store JSON state and compare to new JSON state?
+            // Any change will require adjustments
 
             pst.index    = 0;
             pst.position = [ 0, 0, 0 ];
 
             pst.rawWord     = pst._stepWord( pst.index );
-            pst.fragments   = pst._split( pst.rawWord, pst._maxChars );
+            pst.fragments   = pst._split( pst.rawWord, getStateProp( 'maxNumCharacters' ) );
 
             return pst;
         };
@@ -130,15 +146,16 @@
             notArrayOfIntsOrIntErrors( changesOrIndex ); // Throw errors if needed
 
             var pos             = pst.position,
+                // TODO: If any state change, probably need to re-split word
                 maxCharsChanged = false,
                 fragIndex       = 0;
 
             // If maxChars is changed, store new value internally,
             // re-fragment word and start at the beginning of word
             // (TODO: or map current progress to new fragment array?)
-            if ( pst._maxChars !== state.maxNumCharacters ) {
-                pst._maxChars   = state.maxNumCharacters
-                maxCharsChanged = true;
+            if ( pst._oldMaxChars !== getStateProp( 'maxNumCharacters' ) ) {
+                pst._oldMaxChars = getStateProp( 'maxNumCharacters' );
+                maxCharsChanged  = true;
             }
 
             // if plain index change/jump
@@ -167,7 +184,7 @@
             // negating the validity of old fragment positions
             if ( maxCharsChanged ) { pos[2] = 0; }
             else { pos[2] = fragIndex }
-            
+
             var frag = pst.fragments[ pos[2] ];
             return frag;
         }  // End pst.getFragment()
@@ -185,21 +202,17 @@
         * it as an array of strings.
         */
             // Values for splitter
-            var sep = pst._state.separator;
-            // ??: Set back to default if state has invalid value?
-            if ( lengthIsValid( state.minLengthForSeparator ) ) {
-                pst._minLengthForSeparator = state.minLengthForSeparator;  // ??: || 3?
-            }
-
-            if ( pst._maxChars < pst._minLengthForSeparator ) { sep = ''; }
+            var sep = getStateProp( 'separator' );
+            var maxChars = getStateProp( 'maxNumCharacters' );
+            if ( maxChars < getStateProp( 'minLengthForSeparator' ) ) { sep = ''; }
 
             var toPass = {
                 separator: sep,
-                fractionOfMax: pst._state.fractionOfMax,
-                redistribute: pst._state.redistribute
+                fractionOfMax: getStateProp( 'fractionOfMax' ),
+                redistribute: getStateProp( 'redistribute' )
             }
 
-            return pst._split( pst.rawWord, pst._maxChars, toPass );
+            return pst._split( pst.rawWord, maxChars, toPass );
         };  // End pst._getTheSplit()
 
 
@@ -235,7 +248,20 @@
             // Note: doesn't skip more than one word at a time and starts
             // at the beginning of the next word, no matter the step value
             if ( fragi >= pst.fragments.length ) {
+
+                // Have to see if we were already at the last word when we
+                // crossed the word boundry
+                var progressBefore = pst.getProgress();
+
                 pst.rawWord = pst._stepWord( pst.index + 1 );
+
+                // At very end, go to last fragment
+                if ( progressBefore === 1 ) {
+                    // Since we were already in the last word, we have the right fragments
+                    returnIndex = pst.fragments.length - 1;
+                    // If maxChars changed, this will be changed into 0 anyway, so
+                    // no worries about wrong indexes because of that change
+                }
             
             } else if (fragi < 0) {
                 pst.rawWord = pst._stepWord( pst.index - 1 );
@@ -357,7 +383,27 @@
         // ERRORS
         // =====================================
 
-        var lengthIsValid = function ( arg ) {
+        var getStateProp = function ( propName ) {
+        /* ( str ) -> Various
+        * 
+        * Either get a property from pst._state, return a default
+        * value, or throw an error.
+        */
+            var val = null;
+
+            if ( pst._state ) {
+                var funcName = '_getValid_' + propName;
+                val = pst[ funcName ]( pst._state[ propName ] );
+            } else {
+                val = defaults[ propName ];
+            }
+
+            return val;
+        };  // End getStateProp()
+
+
+        // ---- Non-splitter values ----
+        pst._getValid_minLengthForSeparator = function ( arg ) {
         /* ( int ) -> True or throw error
         * 
         * Will throw necessary errors for bad references or things that
@@ -365,12 +411,23 @@
         */
             var msg = 'Was expecting an array of integers. Recieved: ' + arg + ', an ' + Object.prototype.toString.call( arg );
 
-            if ( arg === undefined || arg === null ) { return false; }
+            if ( arg === undefined ) { return defaults.minLengthForSeparator; }
             if ( !isInt( arg ) ) { throw new TypeError( msg ) }
 
             // Otherwise, we're cool
-            return true;
-        };  // End lengthIsValid()
+            return arg;
+        };  // End pst._getValid_minLengthForSeparator()
+
+        // ---- Splitter values ----
+        // All defaults are valid values for the splitter
+        // Otherwise, invalid values will be handled by the splitter
+        pst._getValid_maxNumCharacters = function ( val ) { return val || defaults.maxNumCharacters; }
+        pst._getValid_redistribute = function ( val ) { return val || defaults.redistribute; }
+        pst._getValid_fractionOfMax = function ( val ) { return val || defaults.fractionOfMax; }
+        pst._getValid_separator = function ( val ) {
+            if ( val == '' ) { return val }
+            else { return val || defaults.separator; }
+        }
 
 
         var notArrayOfArraysOfStringsErrors = function ( arg ) {
@@ -440,14 +497,11 @@
         * Now that functions exist, use them to check and set
         * values
         */
-            pst._state      = state;
-            pst._split      = split;  // func
-            pst._maxChars   = state.maxNumCharacters;
-            // Minimum number of letters required to include a separator
-            pst._minLengthForSeparator = 3;
-            if ( lengthIsValid( state.minLengthForSeparator ) ) {
-                pst._minLengthForSeparator = state.minLengthForSeparator;
-            }
+            pst._split = split;  // func
+
+            pst._state       = state;
+            pst._oldMaxChars = getStateProp( 'maxNumCharacters' );
+            pst._minLengthForSeparator = getStateProp( 'minLengthForSeparator' );
 
             pst._progress   = 0;
             sentences       = pst._sentences = null;

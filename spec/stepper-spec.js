@@ -14,12 +14,18 @@ var ProseStepper = require('../dist/prose-stepper.js');
 
 describe("When a ProseStepper instance", function () {
 
-	var ps, state, sentences;
+	var sentences = [
+		['Victorious,', 'you', 'brave', 'flag.'], 
+		['Delirious,', 'I', 'come', 'back.'], 
+		['\n'], 
+		['Why,', 'oh', 'walrus?']
+	];
+
+	var ps, state;
 
 	beforeEach( function () {
 		state 	  = { maxNumCharacters: 5 };
 		ps 		  = new ProseStepper( state );
-		sentences = [  ['Victorious,','you','brave','flag.'], ['Delirious,','I','come','back.'], ['\n'], ['Why,','oh','walrus?'] ];
 	})
 
 	// ==== EXPECTED INPUT ====
@@ -28,6 +34,21 @@ describe("When a ProseStepper instance", function () {
 		beforeEach( function () {
 			ps.process( sentences );
 		});
+
+		// --- Defaults ---
+		describe("and formed with no state object values", function () {
+			
+			beforeEach( function () {
+				ps = new ProseStepper();
+				ps.process( sentences )
+			});
+
+			it("should use its defaults", function () {
+				expect( ps.getFragment( [0, 0, 0] )).toEqual( 'Victorious,')
+			});
+
+		});
+
 
 		// --- Current ---
 		describe("and asked for the current fragment without any stepping", function () {
@@ -86,6 +107,8 @@ describe("When a ProseStepper instance", function () {
 					expect( ps.getFragment( [1, 0, -1] )).toEqual( result );  // same as [1, 0,  0]
 				});
 
+				xit("Sentence delta greater than number of sentences")
+
 				describe("and then asked for the current fragment", function () {
 					// Explicit retention tests
 					it("should retain the mid-text sentence position.", function () {
@@ -131,6 +154,8 @@ describe("When a ProseStepper instance", function () {
 			});  // End 3 sentences
 
 			describe("more sentences than exist", function () {
+
+				xit("should return the last fragment in the last word?")
 
 				it("it should return the 1st fragment in the last word in the last sentence.", function () {
 					var result = 'walr-';
@@ -239,6 +264,8 @@ describe("When a ProseStepper instance", function () {
 
 			describe("more words than exist", function () {
 
+				xit("should return the last fragment in the last word?")
+
 				it("should return the 1st fragment in the last word in the last sentence.", function () {
 					var result = 'walr-';
 					expect( ps.getFragment( [0, 100, 0] )).toEqual( result );
@@ -326,19 +353,44 @@ describe("When a ProseStepper instance", function () {
 					});
 
 				});
+				
+				describe("into the last word,", function () {
+					
+					it("it should give the 1st fragment last word.", function () {
+						var result = 'walr-';
+						expect( ps.getFragment( [4, 0, 0] )).toEqual( result );
+						expect( ps.getFragment( [0, 0, -1] )).toEqual( 'oh' );
+						expect( ps.getFragment( [0, 0, 1] )).toEqual( result );
+						expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
+					});
+
+				});
+				
+				describe("past the last word just as `.maxNumCharacters` changes,", function () {
+					
+					it("it should give the last fragment last word.", function () {
+						var result = 'walrus?';
+						expect( ps.getFragment( [4, 0, 0] )).toEqual( 'walr-' );
+						expect( ps.getFragment( [0, 0, -1] )).toEqual( 'oh' );
+						state.maxNumCharacters = 20;
+						expect( ps.getFragment( [0, 0, 1] )).toEqual( result );
+						expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
+					});
+
+				});
 
 			});  // End 1 fragment
 
 			describe("2 fragments", function () {
 
 				describe("at the very last fragment,", function () {
-					
+
 					// TODO: Desired behavior? Elsewhere, we get the first fragment in the
 					// next word. On the last word, which fragment do we want?
 					it("it should return the last fragment in the last word in the last sentence.", function () {
-						var result = 'walr-';
-						expect( ps.getFragment( [4, 0, 0] )).toEqual( result );
-						expect( ps.getFragment( [0, 0, 2] )).toEqual( result );  // Want 'us?'
+						var result = 'us?';
+						expect( ps.getFragment( [4, 0, 0] )).toEqual( 'walr-' );
+						expect( ps.getFragment( [0, 0, 2] )).toEqual( result );
 						expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 					});
 
@@ -365,8 +417,6 @@ describe("When a ProseStepper instance", function () {
 				});
 
 			});  // End 2 fragments
-
-			// More fragments than exist just go to the next word
 
 		});  // End forward
 
@@ -765,6 +815,8 @@ describe("When a ProseStepper instance", function () {
 
 			});
 
+			xit("Jump past end, back at start? Error? Undefined...? last word? last fragment?")
+
 		});  // End call `.getFragment()` using an index number
 
 
@@ -837,7 +889,7 @@ describe("When a ProseStepper instance", function () {
 		// --- `.minLengthForSeparator` ---
 
 		// --- Default `state.minLengthForSeparator` ---
-		describe("and it's maximum characters is changed to something less than 3", function () {
+		describe("and its maximum characters is changed to something less than 3", function () {
 
 			it("because of it's `._minLengthForSeparator` it should not include a hyphen in the result.", function () {
 				state.maxNumCharacters = 2;
@@ -846,6 +898,9 @@ describe("When a ProseStepper instance", function () {
 			});
 
 		});
+
+		xit("and its `state.separator` is changed to something with more characters...?")
+		xit("and its `.setState` is used with valid and invalid values...?")
 
 		// --- Custom `state.minLengthForSeparator` ---
 		describe("and its `state`s `.minLengthForSeparator` is changed to", function () {
@@ -889,36 +944,6 @@ describe("When a ProseStepper instance", function () {
 					state.minLengthForSeparator = -1;
 					expect( ps.getFragment( [0, 0, 0] )).toEqual('Vict-');
 					expect( ps.getFragment( [0, 0, 1] )).toEqual('orio-');
-				});
-
-			});
-
-			describe("null", function () {
-
-				it("it should behave as normal.", function () {
-					state.minLengthForSeparator = null;
-					// It's not split evenly because there's a comma at the end
-					expect( ps.getFragment( [0, 0, 0] )).toEqual('Vict-');
-					expect( ps.getFragment( [0, 0, 1] )).toEqual('orio-');
-				});
-
-			});
-
-			// TODO: Resolve questionable behavior (see below)
-			describe("something other than 3 and then null", function () {
-
-				// Should use last valid value, or original default value?
-				it("it should use the last valid value (and therefore not include a hyphen/separator in the result).", function () {
-					state.minLengthForSeparator = 8;
-					// It's not split evenly because there's a comma at the end
-					expect( ps.getFragment( [0, 0, 0] )).toEqual('Vict');
-					expect( ps.getFragment( [0, 0, 1] )).toEqual('orio');
-
-					ps.restart()
-					state.minLengthForSeparator = null;
-					// It's not split evenly because there's a comma at the end
-					expect( ps.getFragment( [0, 0, 0] )).toEqual('Vict');
-					expect( ps.getFragment( [0, 0, 1] )).toEqual('orio');
 				});
 
 			});
@@ -1247,13 +1272,20 @@ describe("When a ProseStepper instance", function () {
 
 		});  // End .getFragment()
 
+		// `state`
+
 		// --- `state.minLengthForSeparator` ---
-		// --- takes null or positive int ---
+		// --- takes undefined or positive int ---
 		describe("for its `state`s `.minLengthForSeparator`,", function () {
 
 			var step = [0, 0, 0];
 
-			// undefined, null, and any integer is fine
+			// undefined or any integer is fine
+
+			it("`null`, it should throw a TYPE error", function () {
+			state.minLengthForSeparator = null;
+				expect( function () { ps.getFragment( step ); }).toThrowError( TypeError, /Was expecting/ );
+			});
 
 			it("`true`, it should throw a TYPE error", function () {
 			state.minLengthForSeparator = true;

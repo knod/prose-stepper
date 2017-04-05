@@ -1,6 +1,6 @@
 {
   "name": "@knod/prose-stepper",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Navigate through the words and sentences of prose text, stepping backward and forward sequentially",
   "main": "dist/prose-stepper.js",
   "scripts": {
