@@ -76,7 +76,7 @@ var five = ps1.getFragment( [0, 0, 5] );  // 'back.'
 // You can move backwards too
 var six = ps1.getFragment( [0, 0, -1] );  // 'come'
 
-// Word deltas can cross sentence boundries
+// Word deltas can cross sentence boundaries
 var seven = ps1.getFragment( [0, -3, 0] );  // 'flag.'
 
 // You can take multiple steps at a time with sentences...
@@ -239,4 +239,3 @@ Pull requests are welcome, though I've got limited time to manage them. If you w
 
 # License
 MIT
-
