@@ -842,18 +842,61 @@ describe("When a ProseStepper instance", function () {
 
 			describe("should return progress as a fraction based on: current word (not fragment) number / number of total words.", function () {
 
+				it("It should be [1/4, 1/4, 1/3] on the 1st fragment.", function () {
+					ps.getFragment( [0, 0, 0] );
+					expect( ps.getRelativeProgress() ).toEqual( [1/4, 1/4, 1/3] );
+				});
+
+				it("It should be [1/4, 1/4, 2/3] on the 2nd fragment.", function () {
+					ps.getFragment( [0, 0, 0] );
+					ps.getFragment( [0, 0, 1] );
+					expect( ps.getRelativeProgress() ).toEqual( [1/4, 1/4, 2/3] );
+				});
+
+				it("It should be [1/4, 1/4, 1] on the 1st word, last fragment.", function () {
+					ps.getFragment( [0, 0, 0] );
+					ps.getFragment( [0, 0, 1] );
+					ps.getFragment( [0, 0, 1] );
+					expect( ps.getRelativeProgress() ).toEqual( [1/4, 1/4, 1] );
+				});
+
+				it("It should be [1/4, 1, 1] on the 2nd word, 1st fragment.", function () {
+					ps.getFragment( [0, 1, 0] );
+					// expect( ps.getRelativeProgress() ).toEqual( 1/11 );
+					// expect( ps.getRelativeProgress() ).toEqual( [0, 0, 1] );
+					expect( ps.getRelativeProgress() ).toEqual( [1/4, 1, 1] );
+				});
+
+				it("It should be [2/4, 1/4, 1/3] on the 5th word, 1st fragment, when moved forward a sentence.", function () {
+					ps.getFragment( [1, 0, 0] );
+					// expect( ps.getRelativeProgress() ).toEqual( 4/11 );
+					// expect( ps.getRelativeProgress() ).toEqual( [1/3, 0, 0/2] );
+					expect( ps.getRelativeProgress() ).toEqual( [2/4, 1/4, 1/3] );
+				});
+
+				it("It should be [1, 1, 1] on the last fragment.", function () {
+					ps.getFragment( [5, 0, 0] );
+					ps.getFragment( [0, 0, 100] );
+					// expect( ps.getRelativeProgress() ).toEqual( 1 );
+					expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+				});
+
+			});  // End .getRelativeProgress()
+
+			describe("should return progress as a fraction based on: current word (not fragment) number / number of total words.", function () {
+
 				it("It should be 0 on the 1st word.", function () {
 					ps.getFragment( [0, 0, 0] );
-					expect( ps.getProgress() ).toEqual( 0 );
+					expect( ps.getProgress() ).toEqual( 0/11 );
 					ps.getFragment( [0, 0, 1] );
-					expect( ps.getProgress() ).toEqual( 0 );
+					expect( ps.getProgress() ).toEqual( 0/11 );
 					ps.getFragment( [0, 0, 1] );
-					expect( ps.getProgress() ).toEqual( 0 );
+					expect( ps.getProgress() ).toEqual( 0/11 );
 				});
 
 				it("It should be 1/11 on the 2nd word.", function () {
 					ps.getFragment( [0, 1, 0] );
-					expect( ps.getProgress() ).toEqual( 1/11 );
+					expect( ps.getProgress() ).toEqual( 0/11 );
 				});
 
 				it("It should be 4/11 on the 5th word, when moved forward a sentence.", function () {
@@ -863,10 +906,11 @@ describe("When a ProseStepper instance", function () {
 
 				it("It should be 1 on the 12th word.", function () {
 					ps.getFragment( [5, 0, 0] );
+					ps.getFragment( [0, 0, 100] );
 					expect( ps.getProgress() ).toEqual( 1 );
 				});
 
-			});
+			});  // End .getProgress()
 
 			describe("should return 'index' as an integer based on current word (not fragment) as if it were in an array of words/strings.", function () {
 
@@ -909,7 +953,7 @@ describe("When a ProseStepper instance", function () {
 			it("`.separator`, it should restart the word, getting the first fragment.", function () {
 				expect( ps.getFragment( [0, 0, 1] )).toEqual('orio-');
 				state.separator = '%%%%';
-				expect( ps.getFragment( [0, 0, 1], true )).toEqual('V%%%%');
+				expect( ps.getFragment( [0, 0, 1] )).toEqual('V%%%%');
 			});
 
 			it("`.minLengthForSeparator`, it should restart the word, getting the first fragment.", function () {

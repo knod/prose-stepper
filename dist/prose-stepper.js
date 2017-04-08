@@ -99,9 +99,25 @@
        // GETS
        // =====================================
 
+        pst.getRelativeProgress = function () {
+        /* 
+        * 
+        * Returns the
+        * TODO: Discuss value of sentP, discuss wordP as fraction of sentence
+        * or as fraction of whole. The current numbers are not consistent, but
+        * they are useful.
+        */
+            var sentPos = pst.position[0];
+
+            var sentPr = (sentPos + 1)/sentences.length,  // sentence/num sentences
+                wordPr = (pst.position[1] + 1)/sentences[sentPos].length,
+                fragPr = (pst.position[2] + 1)/pst.fragments.length;
+
+            return [ sentPr, wordPr, fragPr ];
+        };  // End pst.getRelativeProgress
         pst.getProgress = function () {
-            pst._progress = pst.index / (positions.length - 1);
-            return pst._progress;
+            var percentDone = pst.index / (positions.length - 1);
+            return percentDone;
         };
         pst.getLength = function () { return positions.length; };
         pst.getIndex = function () { return pst.index; }
@@ -254,12 +270,14 @@
 
                 // Have to see if we were already at the last word when we
                 // crossed the word boundry
-                var progressBefore = pst.getProgress();
+                // (Returned progress is a non-intuitive array)
+                var progressBefore = pst.getProgress()[1];
 
                 pst.rawWord = pst._stepWord( pst.index + 1 );
 
                 // At very end, go to last fragment
                 if ( progressBefore === 1 ) {
+
                     // Since we were already in the last word, we have the right fragments
                     returnIndex = pst.fragments.length - 1;
                     // If maxChars changed, this will be changed into 0 anyway, so
@@ -574,7 +592,6 @@
             pst._state = state;
             setOldState( state );
 
-            pst._progress   = 0;
             sentences       = pst._sentences = null;
             positions       = pst._positions = [];
 
