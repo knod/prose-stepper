@@ -1,7 +1,7 @@
 /* prose-stepper.js
 * 
-* Step back and forth through sentences and words
-* Also splits up the words into fragments if needed?
+* Step back and forth through sentences and words.
+* Also splits up the words into fragments if needed.
 */
 
 (function (root, stepFactory) {  // root is usually `window`
@@ -28,9 +28,10 @@
     * options for the word splitter, as well as for the ProseStepper
     * instance itself.
     * 
-    * Provides commands for getting the words/fragments passed into
+    * Provides commands for getting the sentences/words passed into
     * its `.process()`. 
-    * Always use .getFragment()
+    * 
+    * For more info, see the README.
     */
         var pst = {};
 
@@ -99,28 +100,60 @@
        // GETS
        // =====================================
 
-        pst.getRelativeProgress = function () {
-        /* 
+        pst.getProgressions = function () {
+        /* ( None ) -> [ {}, {}, {} ]
         * 
-        * Returns the
-        * TODO: Discuss value of sentP, discuss wordP as fraction of sentence
-        * or as fraction of whole. The current numbers are not consistent, but
-        * they are useful.
+        * Returns an array containing 3 objects each with
+        * the `total` number of items in their group and their own
+        * `index` location within that group.
+        * 
+        * TODO: Object containing 3 objects instead? Nested objects?
+        *       Nested arrays?
+        * TODO: Include relative progress calculations too?
         */
-            var sentPos = pst.position[0];
+            var pos = pst.position;
+            var data = [
+                { total: sentences.length,            index: pos[0] },
+                { total: sentences[ pos[0] ].length,  index: pos[1] },
+                { total: pst.fragments.length,        index: pos[2] }
+            ];
 
-            var sentPr = (sentPos + 1)/sentences.length,  // sentence/num sentences
-                wordPr = (pst.position[1] + 1)/sentences[sentPos].length,
-                fragPr = (pst.position[2] + 1)/pst.fragments.length;
+            return data;
+        };  // End pst.getProgressions
+
+        pst.getRelativeProgress = function () {
+        /* ( None ) -> [ Float ]
+        * 
+        * Returns an array containing
+        * 1. sentence index/num sentences
+        * 2. word index/num words in sentence
+        * 3. fragment index/num fragments in word
+        */
+            var progs = pst.getProgressions();
+
+            var sentPr = (progs[0].index + 1) / progs[0].total,  // sentence/num sentences
+                wordPr = (progs[1].index + 1) / progs[1].total,  // word/num sentence words
+                fragPr = (progs[2].index + 1) / progs[2].total;  // fragment/num word fragments
 
             return [ sentPr, wordPr, fragPr ];
         };  // End pst.getRelativeProgress
+
         pst.getProgress = function () {
-            var percentDone = pst.index / (positions.length - 1);
-            return percentDone;
+        /* ( None ) -> Float
+        * 
+        * Should start at some fraction and reach 1 at the last
+        * fragment. Uses word progress and fragment progress to make
+        * sure we get 1 at the last fragment, not just the last word
+        */
+            // +1 so that one-fragment words don't have 0 fragment progress
+            // Can't do length - 1 in case the length is 1 (0 denominator)
+            var fragProgress = (pst.position[2] + 1) / pst.fragments.length,
+                progress     = (pst.index + fragProgress) / positions.length;
+            return progress;
         };
+
         pst.getLength = function () { return positions.length; };
-        pst.getIndex = function () { return pst.index; }
+        pst.getIndex = function () { return pst.index; }  // For consistency
 
 
 
@@ -142,7 +175,11 @@
 
 
         pst.restart = function () {
-        // ??: Return first fragment?
+        /* ( None ) -> ProseStepper
+        * 
+        * Resets values and makes calculations based on those values.
+        * TODO: Discuss returning first fragment instead
+        */
             pst.index    = 0;
             pst.position = [ 0, 0, 0 ];
 
@@ -157,7 +194,7 @@
         /* ( [int, int, int] or int ) -> Str
         * 
         * Only one of the ints can be something other than 0.
-        * TODO: Is another method ever needed? Find out.
+        * TODO: Is another method ever needed? User testing needed.
         * 
         * This thing is complicated. See the README.
         */
@@ -268,20 +305,19 @@
             // at the beginning of the next word, no matter the step value
             if ( fragi >= pst.fragments.length ) {
 
-                // Have to see if we were already at the last word when we
-                // crossed the word boundry
-                // (Returned progress is a non-intuitive array)
-                var progressBefore = pst.getProgress()[1];
+                // If at last word, stay at/go to end?
+                var wordProgress = (pst.getIndex() + 1) / pst.getLength()
 
-                pst.rawWord = pst._stepWord( pst.index + 1 );
-
-                // At very end, go to last fragment
-                if ( progressBefore === 1 ) {
-
-                    // Since we were already in the last word, we have the right fragments
+                // Had already reached last word (100% of words)
+                if ( wordProgress === 1 ) {
+                    // Since we were already in the last word, we have the right .fragments
                     returnIndex = pst.fragments.length - 1;
                     // If maxChars changed, this will be changed into 0 anyway, so
                     // no worries about wrong indexes because of that change
+
+                // Otherwise start new word
+                } else {
+                    pst.rawWord = pst._stepWord( pst.index + 1 );
                 }
             
             } else if (fragi < 0) {
@@ -298,7 +334,7 @@
 
 
         pst._stepWord = function ( index ) {
-        /* ( int ) -> [ Str ]
+        /* ( int ) -> Str
         * 
         * Return a string that is the word at that `index` position.
         * A ton of things use this.
@@ -394,7 +430,7 @@
         }
 
         var isInt = function ( arg ) {
-            return ( typeof arg === 'number' ) && !isNaN( arg ) && ( arg % 1 === 0 )
+            return ( typeof arg === 'number' ) && !isNaN( arg ) && ( arg % 1 === 0 );
         };
 
         pst.normalizeIndex = function ( index ) {
@@ -413,7 +449,8 @@
         /* ( {} ) -> Bool
         * 
         * If `testState` has different values for relevant properties
-        * than the current state, return `true`, otherwise `false`.
+        * than the current state, change our semi-internal `._state`, our
+        * internal `oldState`, and return `true`, otherwise return `false`.
         */
             var changed;
 
@@ -425,10 +462,10 @@
                     stateChanged = true;
                     // Trigger any errors if necessary
                     getStateProp( testState, prop );
-                    // ??: Do this here, or after it's all over? Will
-                    // changing some of them mess stuff up if a later one
-                    // throws an error?
+                    // ??: Do this here, or after it's all over? 
                     // oldState[ prop ] = testState[ prop ];
+                    // Will changing some of them mess stuff up if a later
+                    // one throws an error?
                 }
             }
 
@@ -446,11 +483,11 @@
         * 
         * Create and return a new `oldState` object. Future state
         * changes will be compared to this old version. Can't just
-        * do `oldState` = `newState`, because then if the `newState`s
-        * properties change, so will `oldState`s and no change will
-        * be detected.
+        * do `oldState` = `newState`, because mutability - if the
+        * `newState`s properties change, so will `oldState`s and no
+        * change will be detected.
         */
-            oldState = {};
+            oldState = {};  // "global" in ProseStepper
             for ( let propi = 0; propi < relevantProps.length; propi++ ) {
                 let prop = relevantProps[ propi ]
                 if ( newState ) { oldState[ prop ] = newState[ prop ]; }
@@ -461,7 +498,7 @@
 
 
         // =====================================
-        // ERRORS
+        // ERRORS/GETTER HELPERS
         // =====================================
 
         var getStateProp = function ( state, propName ) {
@@ -469,7 +506,7 @@
         * 
         * Either get a property from `state`, return a default
         * value, or throw an error. We'll trigger any errors
-        * we can, but some of these only error in the splitter
+        * we can, but some of these only error in the splitter.
         */
             var val = null;
 
@@ -491,7 +528,7 @@
 
         // ---- Non-splitter values ----
         pst._getValid_minLengthForSeparator = function ( arg ) {
-        /* ( int ) -> True or throw error
+        /* ( int ) -> Int or throw error
         * 
         * Will throw necessary errors for bad references or things that
         * aren't ints or arrays of ints. Otherwise, will return `true`
@@ -515,6 +552,7 @@
         pst._getValid_redistribute = function ( val ) { return val || defaults.redistribute; }
         pst._getValid_fractionOfMax = function ( val ) { return val || defaults.fractionOfMax; }
         pst._getValid_separator = function ( val ) {
+            // We want to allow empty string, but it's falsy. Solution:
             if ( val == '' ) { return val }
             else { return val || defaults.separator; }
         }
@@ -592,8 +630,8 @@
             pst._state = state;
             setOldState( state );
 
-            sentences       = pst._sentences = null;
-            positions       = pst._positions = [];
+            sentences = pst._sentences = null;
+            positions = pst._positions = [];
 
             return pst;
         };  // End pst.init()

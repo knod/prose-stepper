@@ -18,18 +18,30 @@ describe("When a ProseStepper instance", function () {
 		['Victorious,', 'you', 'brave', 'flag.'], 
 		['Delirious,', 'I', 'come', 'back.'], 
 		['\n'], 
-		['Why,', 'oh', 'walrus?']
+		['Why,', 'oh', 'wattlebird?']
 	];
+
+// "watt-" "elbi-" "rd?"
 
 	var ps, state;
 
 	beforeEach( function () {
-		state 	  = { maxNumCharacters: 5 };
-		ps 		  = new ProseStepper( state );
+		state	= { maxNumCharacters: 5 };
+		ps 		= new ProseStepper( state );
 	})
 
 	// ==== EXPECTED INPUT ====
-	describe("is given an array of arrays of strings and a positive integer", function () {
+	describe("is given an array of arrays with an empty string ([['']])", function () {
+		it("it should give an empty string on `.getFragment()`.", function () {
+			ps.process( [['']] );
+			expect( ps.getFragment( [0, 0, 0] )).toEqual( '' );
+			expect( ps.getFragment( [0, 0, 1] )).toEqual( '' );
+			expect( ps.getFragment( [0, 1, 0] )).toEqual( '' );
+			expect( ps.getFragment( [0, -1, 0] )).toEqual( '' );
+		});
+	});
+
+	describe("is given an array of arrays of strings", function () {
 
 		beforeEach( function () {
 			ps.process( sentences );
@@ -90,7 +102,7 @@ describe("When a ProseStepper instance", function () {
 			describe("1 sentence", function () {
 
 				it("at the very last sentence, it should return the last word in the last sentence.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					ps.getFragment( [3, 0, 0] );
 					expect( ps.getFragment( [1, 0, 0] )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
@@ -132,7 +144,7 @@ describe("When a ProseStepper instance", function () {
 			describe("3 sentences", function () {
 
 				it("at the very last sentence, it should return the last word in the last sentence.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					ps.getFragment( [3, 0, 0] );
 					expect( ps.getFragment( [3, 0, 0] )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
@@ -166,7 +178,7 @@ describe("When a ProseStepper instance", function () {
 
 				// TODO: Discuss behavior - should return the last fragment in the last word?
 				it("it should return the 1st fragment in the last word in the last sentence.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					expect( ps.getFragment( [5, 0, 0] )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 				});
@@ -178,7 +190,7 @@ describe("When a ProseStepper instance", function () {
 			describe("1 word", function () {
 
 				it("at the very last word, it should return the last word in the last sentence.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					expect( ps.getFragment( [4, 0, 0] )).toEqual( result );
 					expect( ps.getFragment( [0, 1, 0] )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
@@ -232,7 +244,7 @@ describe("When a ProseStepper instance", function () {
 			describe("2 words", function () {
 
 				it("at the very last word, it should return the last word in the last sentence.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					expect( ps.getFragment( [4, 0, 0] )).toEqual( result );
 					expect( ps.getFragment( [0, 2, 0] )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
@@ -274,7 +286,7 @@ describe("When a ProseStepper instance", function () {
 
 				// TODO: Discuss behavior - should return the last fragment in the last word?
 				it("should return the 1st fragment in the last word in the last sentence.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					expect( ps.getFragment( [0, 100, 0] )).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 				});
@@ -284,26 +296,86 @@ describe("When a ProseStepper instance", function () {
 			// --- Fragments ---
 			describe("1 fragment", function () {
 
-				describe("at the very last fragment,", function () {
+				describe("at the 1st fragment of the last word,", function () {
 
-					it("should return the last fragment in the last word in the last sentence.", function () {
-						var result = 'us?';
-						expect( ps.getFragment( [4, 0, 0] )).toEqual( 'walr-' );
-						expect( ps.getFragment( [0, 0, 1] )).toEqual( result );
-						expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
-					});
+					describe("of a 3 fragment word,", function () {
 
-					describe("and then asked for the current fragment", function () {
+						it("it should return the 2nd fragment in the last word in the last sentence.", function () {
+							var result = 'lebi-';
+							expect( ps.getFragment( [4, 0, 0] )).toEqual( 'watt-' );
+							expect( ps.getFragment( [0, 0, 1] )).toEqual( result );
+							expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
+						});
 
-						it("should retain a the position at the last fragment.", function () {
-							ps.getFragment( [4, 0, 0] )
-							var frag1 = ps.getFragment( [0, 0, 1] )
-							expect( ps.getFragment( [0, 0, 0] )).toEqual( frag1 )
+						describe("and then asked for the current fragment", function () {
+
+							it("should retain a the position at the last fragment.", function () {
+								ps.getFragment( [4, 0, 0] )
+								var frag1 = ps.getFragment( [0, 0, 1] )
+								expect( ps.getFragment( [0, 0, 0] )).toEqual( frag1 )
+							});
+
 						});
 
 					});
 
-				});
+				});  // end 1st frag of last word
+
+				describe("at the 2nd fragment of the last word,", function () {
+
+					describe("of a 3 fragment word,", function () {
+
+						it("it should return the last fragment in the last word in the last sentence.", function () {
+							var result = 'rd?';
+							expect( ps.getFragment( [4, 0, 0] )).toEqual( 'watt-' );
+							expect( ps.getFragment( [0, 0, 1] )).toEqual( 'lebi-' );
+							expect( ps.getFragment( [0, 0, 1] )).toEqual( result );
+							expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
+						});
+
+						describe("and then asked for the current fragment", function () {
+
+							it("should retain a the position at the last fragment.", function () {
+								ps.getFragment( [4, 0, 0] )
+								ps.getFragment( [0, 0, 1] )
+								var frag1 = ps.getFragment( [0, 0, 1] )
+								expect( ps.getFragment( [0, 0, 0] )).toEqual( frag1 )
+							});
+
+						});
+
+					});
+
+				});  // end 2d frag of last word
+
+				describe("at the very last fragment,", function () {
+
+					describe("of a 3 fragment word,", function () {
+
+						it("it should return the last fragment in the last word in the last sentence.", function () {
+							var result = 'rd?';
+							expect( ps.getFragment( [4, 0, 0] )).toEqual( 'watt-' );
+							expect( ps.getFragment( [0, 0, 1] )).toEqual( 'lebi-' );
+							expect( ps.getFragment( [0, 0, 1] )).toEqual( result );
+							expect( ps.getFragment( [0, 0, 1] )).toEqual( result );
+							expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
+						});
+
+						describe("and then asked for the current fragment", function () {
+
+							it("should retain a the position at the last fragment.", function () {
+								ps.getFragment( [4, 0, 0] );
+								ps.getFragment( [0, 0, 1] );
+								ps.getFragment( [0, 0, 1] );
+								var frag1 = ps.getFragment( [0, 0, 1] );
+								expect( ps.getFragment( [0, 0, 0] )).toEqual( frag1 )
+							});
+
+						});
+
+					});
+
+				});  // end 3rd/last frag of last word
 
 
 				describe("should give the next fragment", function () {
@@ -364,7 +436,7 @@ describe("When a ProseStepper instance", function () {
 				describe("into the last word,", function () {
 					
 					it("it should give the 1st fragment last word.", function () {
-						var result = 'walr-';
+						var result = 'watt-';
 						expect( ps.getFragment( [4, 0, 0] )).toEqual( result );
 						expect( ps.getFragment( [0, 0, -1] )).toEqual( 'oh' );
 						expect( ps.getFragment( [0, 0, 1] )).toEqual( result );
@@ -376,8 +448,8 @@ describe("When a ProseStepper instance", function () {
 				describe("past the last word just as `.maxNumCharacters` changes,", function () {
 					
 					it("it should give the last fragment last word.", function () {
-						var result = 'walrus?';
-						expect( ps.getFragment( [4, 0, 0] )).toEqual( 'walr-' );
+						var result = 'wattlebird?';
+						expect( ps.getFragment( [4, 0, 0] )).toEqual( 'watt-' );
 						expect( ps.getFragment( [0, 0, -1] )).toEqual( 'oh' );
 						state.maxNumCharacters = 20;
 						expect( ps.getFragment( [0, 0, 1] )).toEqual( result );
@@ -394,9 +466,9 @@ describe("When a ProseStepper instance", function () {
 
 					// TODO: Desired behavior? Elsewhere, we get the first fragment in the
 					// next word. On the last word, which fragment do we want?
-					it("it should return the last fragment in the last word in the last sentence.", function () {
-						var result = 'us?';
-						expect( ps.getFragment( [4, 0, 0] )).toEqual( 'walr-' );
+					it("it should return the last fragment in the last word (3 fragments) in the last sentence.", function () {
+						var result = 'rd?';
+						expect( ps.getFragment( [4, 0, 0] )).toEqual( 'watt-' );
 						expect( ps.getFragment( [0, 0, 2] )).toEqual( result );
 						expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 					});
@@ -706,21 +778,21 @@ describe("When a ProseStepper instance", function () {
 			describe("of -1 should get the last word", function () {
 				
 				it("when starting at the start of the collection.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					expect( ps.getFragment( 0 ) ).toEqual( 'Vict-' );
 					expect( ps.getFragment( -1 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 				});
 				
 				it("when starting at the middle of the collection.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					expect( ps.getFragment( 5 ) ).toEqual( 'I' );
 					expect( ps.getFragment( -1 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 				});
 				
 				it("when starting at the end of the collection.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					expect( ps.getFragment( 11 ) ).toEqual( result );
 					expect( ps.getFragment( -1 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
@@ -746,7 +818,7 @@ describe("When a ProseStepper instance", function () {
 				
 				it("when starting at the end of the collection.", function () {
 					var result = 'oh';
-					expect( ps.getFragment( 11 ) ).toEqual( 'walr-' );
+					expect( ps.getFragment( 11 ) ).toEqual( 'watt-' );
 					expect( ps.getFragment( -2 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 				});
@@ -769,7 +841,7 @@ describe("When a ProseStepper instance", function () {
 				});
 				it("when starting at the end of the collection.", function () {
 					var result = 'Vict-';
-					expect( ps.getFragment( 11 ) ).toEqual( 'walr-' );
+					expect( ps.getFragment( 11 ) ).toEqual( 'watt-' );
 					expect( ps.getFragment( 0 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 				});
@@ -792,7 +864,7 @@ describe("When a ProseStepper instance", function () {
 				});
 				it("when starting at the end of the collection.", function () {
 					var result = 'I';
-					expect( ps.getFragment( 11 ) ).toEqual( 'walr-' );
+					expect( ps.getFragment( 11 ) ).toEqual( 'watt-' );
 					expect( ps.getFragment( 5 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 				});
@@ -802,20 +874,20 @@ describe("When a ProseStepper instance", function () {
 			describe("of 11, in the 12 word collection, should get the 12th word", function () {
 				
 				it("when starting at the start of the collection.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					expect( ps.getFragment( 0 ) ).toEqual( 'Vict-' );
 					expect( ps.getFragment( 11 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 				});
 				it("when starting at the middle of the collection.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					expect( ps.getFragment( 5 ) ).toEqual( 'I' );
 					expect( ps.getFragment( 11 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 				});
 				it("even when starting at the end of the collection.", function () {
-					var result = 'walr-';
-					expect( ps.getFragment( 11 ) ).toEqual( 'walr-' );
+					var result = 'watt-';
+					expect( ps.getFragment( 11 ) ).toEqual( 'watt-' );
 					expect( ps.getFragment( 11 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
 				});
@@ -826,7 +898,7 @@ describe("When a ProseStepper instance", function () {
 			describe("of 100, in the 12 word collection, should get the 12th word", function () {
 				
 				it("when starting at the start of the collection.", function () {
-					var result = 'walr-';
+					var result = 'watt-';
 					expect( ps.getFragment( 0 ) ).toEqual( 'Vict-' );
 					expect( ps.getFragment( 100 ) ).toEqual( result );
 					expect( ps.getFragment( [0, 0, 0] )).toEqual( result );  // retain position
@@ -837,114 +909,657 @@ describe("When a ProseStepper instance", function () {
 		});  // End call `.getFragment()` using an index number
 
 
+		// ---- One Fragment ----
+		// TODO: Reorganize tests to be more like this set
+		describe("that is a one-fragment collection", function () {
+
+			beforeEach( function () {
+				ps.process( [['Zap']] );
+			});
+
+			it("its `.getIndex()` should return 0.", function () { expect( ps.getIndex() ).toEqual(0) });
+			it("its `.getLength()` should return 1.", function () { expect( ps.getLength() ).toEqual(1) });
+
+			describe("and moved 1 sentence forward", function () {
+
+				it("should return that word.", function () { expect( ps.getFragment( [1, 0, 0] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([1, 0, 0]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 1 sentence back", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [-1, 0, 0] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([-1, 0, 0]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 3 sentence forward", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [3, 0, 0] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([3, 0, 0]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 3 sentence back", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [-3, 0, 0] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([-3, 0, 0]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 1 word forward", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [0, 1, 0] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 1, 0]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 1 word back", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [0, -1, 0] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, -1, 0]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 3 word forward", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [0, 3, 0] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 3, 0]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 3 word back", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [0, -3, 0] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, -3, 0]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 1 fragment forward", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [0, 0, 1] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 0, 1]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 1 fragment back", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [0, 0, -1] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 0, -1]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 3 fragment forward", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [0, 0, 3] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 0, 3]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 3 fragment back", function () {
+				it("should return that word.", function () { expect( ps.getFragment( [0, 0, -3] )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 0, -3]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+
+			describe("and an index (0) number is used", function () {
+				it("should return that word.", function () { expect( ps.getFragment( 0 )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(0) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and an index (1) number is used", function () {
+				it("should return that word.", function () { expect( ps.getFragment( 1 )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(1) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and an index (-1) number is used", function () {
+				it("should return that word.", function () { expect( ps.getFragment( -1 )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(-1) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and an index (2) number is used", function () {
+				it("should return that word.", function () { expect( ps.getFragment( 2 )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(2) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and an index (-2) number is used", function () {
+				it("should return that word.", function () { expect( ps.getFragment( -2 )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(-2) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and an index (5) number is used", function () {
+				it("should return that word.", function () { expect( ps.getFragment( 5 )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(5) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and an index (-5) number is used", function () {
+				it("should return that word.", function () { expect( ps.getFragment( -5 )).toEqual( 'Zap' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(-5) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return [1, 1, 1].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+
+		});  // End one-word collection
+
+
+		// ---- One Word (multi-fragment) ----
+		// TODO: Reorganize tests to be more like this set
+		describe("that is a 1 word, 3 fragment collection", function () {
+
+			beforeEach( function () {
+				ps.setState( {maxNumCharacters: 5} )
+				ps.process( [['wattlebird?']] );
+			});
+
+			it("its `.getIndex()` should return 0.", function () { expect( ps.getIndex() ).toEqual(0) });
+			it("its `.getLength()` should return 1.", function () { expect( ps.getLength() ).toEqual(1) });
+
+			describe("and moved 1 sentence forward", function () {
+
+				it("should return the 1st fragment.", function () { expect( ps.getFragment( [1, 0, 0] )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([1, 0, 0]) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and moved 1 sentence back", function () {
+				it("should return the 1st fragment.", function () { expect( ps.getFragment( [-1, 0, 0] )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([-1, 0, 0]) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and moved 3 sentence forward", function () {
+				it("should return the 1st fragment.", function () { expect( ps.getFragment( [3, 0, 0] )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([3, 0, 0]) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and moved 3 sentence back", function () {
+				it("should return the 1st fragment.", function () { expect( ps.getFragment( [-3, 0, 0] )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([-3, 0, 0]) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and moved 1 word forward", function () {
+				it("should return the 1st fragment.", function () { expect( ps.getFragment( [0, 1, 0] )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 1, 0]) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and moved 1 word back", function () {
+				it("should return the 1st fragment.", function () { expect( ps.getFragment( [0, -1, 0] )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, -1, 0]) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and moved 3 word forward", function () {
+				it("should return the 1st fragment.", function () { expect( ps.getFragment( [0, 3, 0] )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 3, 0]) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and moved 3 word back", function () {
+				it("should return the 1st fragment.", function () { expect( ps.getFragment( [0, -3, 0] )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, -3, 0]) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and moved 1 fragment forward", function () {
+				it("should return the 2nd fragment.", function () { expect( ps.getFragment( [0, 0, 1] )).toEqual( 'lebi-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 0, 1]) });
+					it("`.getProgress()` should return 2/3.", function () {expect( ps.getProgress() ).toEqual(2/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 2/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 2/3] ) });
+				});
+			});
+			describe("and moved 1 fragment back", function () {
+				it("should return the 1st fragment.", function () { expect( ps.getFragment( [0, 0, -1] )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 0, -1]) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and moved 2 fragment forward", function () {
+				it("should return the 3rd/last fragment.", function () { expect( ps.getFragment( [0, 0, 2] )).toEqual( 'rd?' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 0, 2]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return 1.", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 5 fragment forward", function () {
+				it("should return the 3rd/last fragment.", function () { expect( ps.getFragment( [0, 0, 5] )).toEqual( 'rd?' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 0, 5]) });
+					it("`.getProgress()` should return 1.", function () {expect( ps.getProgress() ).toEqual(1) });
+					it("`.getRelativeProgress()` should return 1.", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] ) });
+				});
+			});
+			describe("and moved 5 fragment back", function () {
+				it("should return the 1st fragment.", function () { expect( ps.getFragment( [0, 0, -5] )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment([0, 0, -5]) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+
+			// --- using index number ---
+			describe("and an index (0) number is used", function () {
+				it("should return the first fragment.", function () { expect( ps.getFragment( 0 )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(0) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and an index (1) number is used", function () {
+				it("should return the first fragment.", function () { expect( ps.getFragment( 1 )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(1) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and an index (-1) number is used", function () {
+				it("should return the first fragment.", function () { expect( ps.getFragment( -1 )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(-1) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and an index (2) number is used", function () {
+				it("should return the first fragment.", function () { expect( ps.getFragment( 2 )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(2) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and an index (-2) number is used", function () {
+				it("should return the first fragment.", function () { expect( ps.getFragment( -2 )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(-2) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and an index (5) number is used", function () {
+				it("should return the first fragment.", function () { expect( ps.getFragment( 5 )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(5) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+			describe("and an index (-5) number is used", function () {
+				it("should return the first fragment.", function () { expect( ps.getFragment( -5 )).toEqual( 'watt-' ); });
+
+				describe("its", function () {
+					beforeEach(function () { ps.getFragment(-5) });
+					it("`.getProgress()` should return 1/3.", function () {expect( ps.getProgress() ).toEqual(1/3) });
+					it("`.getRelativeProgress()` should return [1, 1, 1/3].", function () { expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1/3] ) });
+				});
+			});
+
+		});  // End one-word collection
+
+
 		// --- Getters ---
-		describe("and the number of strings in the array is 12", function () {
+		// `.getProgressions()` is tested with `.getRelativeProgress()`
 
-			describe("should return progress as a fraction based on: current word (not fragment) number / number of total words.", function () {
+		describe("and the collection contains", function () {
 
-				it("It should be [1/4, 1/4, 1/3] on the 1st fragment.", function () {
-					ps.getFragment( [0, 0, 0] );
-					expect( ps.getRelativeProgress() ).toEqual( [1/4, 1/4, 1/3] );
+			describe("1 empty string ([['']])", function () {
+
+				beforeEach(function () {
+					ps.process( [['']] );
 				});
 
-				it("It should be [1/4, 1/4, 2/3] on the 2nd fragment.", function () {
-					ps.getFragment( [0, 0, 0] );
-					ps.getFragment( [0, 0, 1] );
-					expect( ps.getRelativeProgress() ).toEqual( [1/4, 1/4, 2/3] );
+				// [['']] `.getProgress()`
+				describe("and `.getProgress()` is called, should return 1", function () {
+
+					it("when getting the current word.", function () {
+						ps.getFragment( 0 )
+						expect( ps.getProgress() ).toEqual( 1 );
+						ps.getFragment( [0, 0, 0] )
+						expect( ps.getProgress() ).toEqual( 1 );
+					});
+
+					it("when moving forward.", function () {
+						ps.getFragment( 3 )
+						expect( ps.getProgress() ).toEqual( 1 );
+						ps.getFragment( [1, 0, 0] )
+						expect( ps.getProgress() ).toEqual( 1 );
+						ps.getFragment( [0, 1, 0] )
+						expect( ps.getProgress() ).toEqual( 1 );
+						ps.getFragment( [0, 0, 1] )
+						expect( ps.getProgress() ).toEqual( 1 );
+					});
+
+					it("when moving backward.", function () {
+						ps.getFragment( -3 )
+						expect( ps.getProgress() ).toEqual( 1 );
+						ps.getFragment( [-1, 0, 0] )
+						expect( ps.getProgress() ).toEqual( 1 );
+						ps.getFragment( [0, -1, 0] )
+						expect( ps.getProgress() ).toEqual( 1 );
+						ps.getFragment( [0, 0, -1] )
+						expect( ps.getProgress() ).toEqual( 1 );
+					});
+
+				});  // end `.getProgress()`
+
+				// [['']] `.getRelativeProgress()`
+				describe("and `.getRelativeProgress()` is called, should return [1, 1, 1]", function () {
+
+					it("when getting the current word.", function () {
+						ps.getFragment( 0 )
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+						ps.getFragment( [0, 0, 0] )
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+						
+					});
+
+					it("when moving forward.", function () {
+						ps.getFragment( 3 )
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+						ps.getFragment( [1, 0, 0] )
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+						ps.getFragment( [0, 1, 0] )
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+						ps.getFragment( [0, 0, 1] )
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+					});
+
+					it("when moving backward.", function () {
+						ps.getFragment( -3 )
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+						ps.getFragment( [-1, 0, 0] )
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+						ps.getFragment( [0, -1, 0] )
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+						ps.getFragment( [0, 0, -1] )
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+					});
+
+				});  // End [['']] `.getRelativeProgress()`
+
+				// [['']] `.getIndex()`, which could be just `.index`, but has a `get` for the sake of consistency
+				describe("should return 0 from `.getIndex()`", function () {
+
+					it("when getting the current word.", function () {
+						ps.getFragment( 0 )
+						expect( ps.getIndex() ).toEqual( 0 );
+						ps.getFragment( [0, 0, 0] )
+						expect( ps.getIndex() ).toEqual( 0 );
+					});
+
+					it("when moving forward.", function () {
+						ps.getFragment( 3 )
+						expect( ps.getIndex() ).toEqual( 0 );
+						ps.getFragment( [1, 0, 0] )
+						expect( ps.getIndex() ).toEqual( 0 );
+						ps.getFragment( [0, 1, 0] )
+						expect( ps.getIndex() ).toEqual( 0 );
+						ps.getFragment( [0, 0, 1] )
+						expect( ps.getIndex() ).toEqual( 0 );
+					});
+
+					it("when moving backward.", function () {
+						ps.getFragment( -3 )
+						expect( ps.getIndex() ).toEqual( 0 );
+						ps.getFragment( [-1, 0, 0] )
+						expect( ps.getIndex() ).toEqual( 0 );
+						ps.getFragment( [0, -1, 0] )
+						expect( ps.getIndex() ).toEqual( 0 );
+						ps.getFragment( [0, 0, -1] )
+						expect( ps.getIndex() ).toEqual( 0 );
+					});
+
+				});  // End [['']] `.getIndex()`
+
+				it("should return 1 from `.getLength()`.", function () {
+					expect( ps.getLength() ).toEqual( 1 );
 				});
 
-				it("It should be [1/4, 1/4, 1] on the 1st word, last fragment.", function () {
-					ps.getFragment( [0, 0, 0] );
-					ps.getFragment( [0, 0, 1] );
-					ps.getFragment( [0, 0, 1] );
-					expect( ps.getRelativeProgress() ).toEqual( [1/4, 1/4, 1] );
+			});  // end ([['']])
+
+
+			describe("a last word that is only one fragment long", function () {
+
+				beforeEach(function () {
+					ps.process([['Here', 'I', 'go.']])
 				});
 
-				it("It should be [1/4, 1, 1] on the 2nd word, 1st fragment.", function () {
-					ps.getFragment( [0, 1, 0] );
-					// expect( ps.getRelativeProgress() ).toEqual( 1/11 );
-					// expect( ps.getRelativeProgress() ).toEqual( [0, 0, 1] );
-					expect( ps.getRelativeProgress() ).toEqual( [1/4, 1, 1] );
-				});
-
-				it("It should be [2/4, 1/4, 1/3] on the 5th word, 1st fragment, when moved forward a sentence.", function () {
-					ps.getFragment( [1, 0, 0] );
-					// expect( ps.getRelativeProgress() ).toEqual( 4/11 );
-					// expect( ps.getRelativeProgress() ).toEqual( [1/3, 0, 0/2] );
-					expect( ps.getRelativeProgress() ).toEqual( [2/4, 1/4, 1/3] );
-				});
-
-				it("It should be [1, 1, 1] on the last fragment.", function () {
-					ps.getFragment( [5, 0, 0] );
-					ps.getFragment( [0, 0, 100] );
-					// expect( ps.getRelativeProgress() ).toEqual( 1 );
-					expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
-				});
-
-			});  // End .getRelativeProgress()
-
-			describe("should return progress as a fraction based on: current word (not fragment) number / number of total words.", function () {
-
-				it("It should be 0 on the 1st word.", function () {
-					ps.getFragment( [0, 0, 0] );
-					expect( ps.getProgress() ).toEqual( 0/11 );
-					ps.getFragment( [0, 0, 1] );
-					expect( ps.getProgress() ).toEqual( 0/11 );
-					ps.getFragment( [0, 0, 1] );
-					expect( ps.getProgress() ).toEqual( 0/11 );
-				});
-
-				it("It should be 1/11 on the 2nd word.", function () {
-					ps.getFragment( [0, 1, 0] );
-					expect( ps.getProgress() ).toEqual( 0/11 );
-				});
-
-				it("It should be 4/11 on the 5th word, when moved forward a sentence.", function () {
-					ps.getFragment( [1, 0, 0] );
-					expect( ps.getProgress() ).toEqual( 4/11 );
-				});
-
-				it("It should be 1 on the 12th word.", function () {
-					ps.getFragment( [5, 0, 0] );
-					ps.getFragment( [0, 0, 100] );
-					expect( ps.getProgress() ).toEqual( 1 );
-				});
-
-			});  // End .getProgress()
-
-			describe("should return 'index' as an integer based on current word (not fragment) as if it were in an array of words/strings.", function () {
-
-				it("It should be 0 on the 1st word.", function () {
-					ps.getFragment( [0, 0, 0] );
-					expect( ps.getIndex() ).toEqual( 0 );
-					ps.getFragment( [0, 0, 1] );
-					expect( ps.getIndex() ).toEqual( 0 );
-					ps.getFragment( [0, 0, 1] );
-					expect( ps.getIndex() ).toEqual( 0 );
-				});
-
-				it("It should be 1 on the 2nd word.", function () {
-					ps.getFragment( [0, 1, 0] );
-					expect( ps.getIndex() ).toEqual( 1);
-				});
-
-				it("It should be 4 on the 5th word, when moved forward a sentence.", function () {
-					ps.getFragment( [1, 0, 0] );
-					expect( ps.getIndex() ).toEqual( 4 );
-				});
-
-				it("It should be 11 on the 12th word.", function () {
-					ps.getFragment( [5, 0, 0] );
-					expect( ps.getIndex() ).toEqual( 11 );
+				it("its `.getProgress()` should return 1 on that last fragment", function () {
+						expect( ps.getFragment( [0, 5, 0] ) ).toEqual( 'go.' );
+						expect( ps.getProgress() ).toEqual( 1 );
+						expect( ps.getFragment( [0, 0, 1] ) ).toEqual( 'go.' );
+						expect( ps.getProgress() ).toEqual( 1 );
 				});
 
 			});
 
-			it("should return 'length' as an integer as if the array were in an array of words/strings.", function () {
-				expect( ps.getLength() ).toEqual( 12 );
-			});
 
-		});  // End `.get` progress, index, and length for length 12 collection
+			describe("12 words", function () {
+
+				// `.getProgress()`
+				describe("should, when `.getProgress()` is called, return progress as a fraction based on: (word index + ((fragment index + 1)/number fragments)) / number of total words.", function () {
+
+					it("It should be (1/3)/12 on the 1st fragment in the 1st word.", function () {
+						ps.getFragment( [0, 0, 0] );
+						expect( ps.getProgress() ).toEqual( (1/3)/12 );
+					});
+
+					it("It should be (2/3)/12 on the 2nd fragment in the 1st word.", function () {
+						ps.getFragment( [0, 0, 0] );
+						expect( ps.getProgress() ).toEqual( (1/3)/12 );
+						ps.getFragment( [0, 0, 1] );
+						expect( ps.getProgress() ).toEqual( (2/3)/12 );
+					});
+
+					it("It should be 1/12 on the 3rd fragment in the 1st word.", function () {
+						ps.getFragment( [0, 0, 0] );
+						expect( ps.getProgress() ).toEqual( (1/3)/12 );
+						ps.getFragment( [0, 0, 1] );
+						expect( ps.getProgress() ).toEqual( (2/3)/12 );
+						ps.getFragment( [0, 0, 1] );
+						expect( ps.getProgress() ).toEqual( 1/12 );
+					});
+
+					it("It should be (1+1)/12 on the 1st (and only) fragment in the 2nd word.", function () {
+						ps.getFragment( [0, 1, 0] );
+						expect( ps.getProgress() ).toEqual( 2/12 );
+					});
+
+					it("It should be (4 + (1/3))/12 on the 1st fragment in the 5th word (made of 3 fragments), when moved forward a sentence.", function () {
+						ps.getFragment( [1, 0, 0] );
+						expect( ps.getProgress() ).toEqual( (4 + (1/3))/12 );
+					});
+
+					it("It should not be 1 on the 1st or 2nd fragment of the 12th (3 fragment) word.", function () {
+						ps.getFragment( [5, 0, 0] );
+						ps.getFragment( [0, 0, 0] );
+						expect( ps.getProgress() ).not.toEqual( 1 );
+						ps.getFragment( [0, 0, 1] );
+						expect( ps.getProgress() ).not.toEqual( 1 );
+					});
+
+					it("It should be 1 on the last fragment of the 12th word.", function () {
+						ps.getFragment( [5, 0, 0] );
+						ps.getFragment( [0, 0, 100] );
+						expect( ps.getProgress() ).toEqual( 1 );
+					});
+
+				});  // End .getProgress()
+
+				describe("should, when `.getRelativeProgress()` is called, return an array of the current position's progress in each inner array.", function () {
+
+					it("It should be [1/4, 1/4, 1/3] on the 1st fragment of a three fragment first word.", function () {
+						ps.getFragment( [0, 0, 0] );
+						expect( ps.getRelativeProgress() ).toEqual( [1/4, 1/4, 1/3] );
+					});
+
+					it("It should be [1/4, 1/4, 2/3] on the 2nd fragment of a three fragment first word.", function () {
+						ps.getFragment( [0, 0, 0] );
+						ps.getFragment( [0, 0, 1] );
+						expect( ps.getRelativeProgress() ).toEqual( [1/4, 1/4, 2/3] );
+					});
+
+					it("It should be [1/4, 1/4, 1] on the 1st word, last fragment of a three fragment first word.", function () {
+						ps.getFragment( [0, 0, 0] );
+						ps.getFragment( [0, 0, 1] );
+						ps.getFragment( [0, 0, 1] );
+						expect( ps.getRelativeProgress() ).toEqual( [1/4, 1/4, 1] );
+					});
+
+					it("It should be [1/4, 1/2, 1] on the 2nd word, 1st (and only) fragment.", function () {
+						ps.getFragment( [0, 1, 0] );
+						ps.getRelativeProgress()
+						expect( ps.getRelativeProgress() ).toEqual( [1/4, 2/4, 1] );
+					});
+
+					it("It should be [2/4, 1/4, 1/3] on the 5th word, 1st fragment, when moved forward a sentence.", function () {
+						ps.getFragment( [1, 0, 0] );
+						expect( ps.getRelativeProgress() ).toEqual( [2/4, 1/4, 1/3] );
+					});
+
+					it("It should be [1, 1, 1] on the last fragment.", function () {
+						ps.getFragment( [5, 0, 0] );
+						ps.getFragment( [0, 0, 100] );
+						expect( ps.getRelativeProgress() ).toEqual( [1, 1, 1] );
+					});
+
+				});  // End .getRelativeProgress()
+
+				// `.getIndex()`, which could be just `.index`, but has a `get` for the sake of consistency
+				describe("should return 'index' as an integer based on current word (not fragment) as if it were in an array of words/strings.", function () {
+
+					it("It should be 0 on the 1st word.", function () {
+						ps.getFragment( [0, 0, 0] );
+						expect( ps.getIndex() ).toEqual( 0 );
+						ps.getFragment( [0, 0, 1] );
+						expect( ps.getIndex() ).toEqual( 0 );
+						ps.getFragment( [0, 0, 1] );
+						expect( ps.getIndex() ).toEqual( 0 );
+					});
+
+					it("It should be 1 on the 2nd word.", function () {
+						ps.getFragment( [0, 1, 0] );
+						expect( ps.getIndex() ).toEqual( 1);
+					});
+
+					it("It should be 4 on the 5th word, when moved forward a sentence.", function () {
+						ps.getFragment( [1, 0, 0] );
+						expect( ps.getIndex() ).toEqual( 4 );
+					});
+
+					it("It should be 11 on the 12th word.", function () {
+						ps.getFragment( [5, 0, 0] );
+						expect( ps.getIndex() ).toEqual( 11 );
+					});
+
+				});
+
+				it("should return 'length' as an integer as if the array were in an array of words/strings.", function () {
+					expect( ps.getLength() ).toEqual( 12 );
+				});
+
+			});  // end normal 12 words
+
+		});  // End `.get` progress, index, and length for collection containing n words
 
 
 		// --- `state` ---
@@ -1050,7 +1665,7 @@ describe("When a ProseStepper instance", function () {
 
 		});
 
-	});  // End expected values
+	});  // End regular expected values
 
 
 	// ==== UNEXPECTED VALUES, CUSTOM ERROR MESSAGES ====
@@ -1440,6 +2055,5 @@ describe("When a ProseStepper instance", function () {
 		});
 
 	});  // End Unexpected Values
-
 
 });  // End ProseStepper

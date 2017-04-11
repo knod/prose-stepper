@@ -2,6 +2,15 @@
 Navigate through the words and sentences of prose text, stepping backward and forward sequentially
 
 
+
+
+
+!!!Isn't ever 0 at start
+
+
+
+
+
 # About
 `prose-stepper` allows linear progress backwards and forwards through prose text, sentence by sentence and word by word, as well as jumping to locations in the text. Currently it only works if it's handed an array of sentences which are, themselves, arrays of words. It can also break words into smaller fragments.
 
@@ -38,8 +47,9 @@ var sentences = [
     [ 'Victorious,', 'you','brave', 'flag.' ],
     [ 'Delirious,', 'I', 'come', 'back.' ],
     [ '\n' ],
-    [ 'Why,', 'oh', 'walrus?' ]
+    [ 'Why,', 'oh', 'wattlebird?' ]
 ];
+
 
 // ================================
 // PROCESSING
@@ -51,10 +61,10 @@ ps1.process( sentences );
 // STEPPING
 // ================================
 // prose-stepper's `.getFragment()` can take an array with three
-// integers - a vector with three deltas. That is, an array with
-// three values that each indicate a direction and a distance to
-// travel within each array. At the moment, only one of the deltas can
-// be active at a time. The other's all have to be 0.
+// integers - three deltas. That is, an array with three values that
+// each indicate a direction and a distance to travel within each array.
+// At the moment, only one of the deltas can be active at a time. The
+// other's all have to be 0.
 
 // All 0's will get you the current fragment. Result at the very start:
 var one = ps1.getFragment( [0, 0, 0] );  // 'Victorious,'
@@ -76,7 +86,7 @@ var five = ps1.getFragment( [0, 0, 5] );  // 'back.'
 // You can move backwards too
 var six = ps1.getFragment( [0, 0, -1] );  // 'come'
 
-// Word deltas can cross sentence boundaries
+// Word deltas can cross sentence boundries
 var seven = ps1.getFragment( [0, -3, 0] );  // 'flag.'
 
 // You can take multiple steps at a time with sentences...
@@ -85,11 +95,11 @@ var eight = ps1.getFragment( [3, 0, 0] );  // 'Why,'
 // ...and with words, forwards and backwards
 var nine = ps1.getFragment( [0, -7, 0] );  // 'brave'
 
-// With stepping, you can't before the first word...
+// With stepping, you can't get before the first word...
 var ten = ps1.getFragment( [-100, 0, 0] );  // 'Victorious,'
 
 // ...or past the last one
-var eleven = ps1.getFragment( [100, 0, 0] );  // 'walrus?'
+var eleven = ps1.getFragment( [100, 0, 0] );  // 'wattlebird?'
 
 // In the middle of a sentence, a sentence delta of -1
 // will go to the start of the current sentence
@@ -99,7 +109,7 @@ var twelve = ps1.getFragment( [-1, 0, 0] );  // 'Why,'
 // ================================
 // JUMPING
 // ================================
-// prose-stepper's `.getFragment()` can also take a positive
+// prose-stepper's `.getFragment()` can also take a single positive
 // or negative integer.
 
 // Jump to any position in the text as if it were a flat array
@@ -112,7 +122,7 @@ var fourtn = ps1.getFragment( -3 );  // 'Why,'
 // Integers past the end of the collection... well, that behavior
 // hasn't been decided yet. Currently, that just gives the
 // last word.
-var fiftn = ps1.getFragment( 20 );  // 'walrus?'
+var fiftn = ps1.getFragment( 20 );  // 'wattlebird?'
 ```
 
 ## An Instance With An Argument
@@ -184,10 +194,33 @@ var two2 = ps2.getFragment( [0, 0, 1] );  // 'Vict%'
 ## Other Operations
 ```js
 // ================================
+// CUSTOM `state` VALUES
+// ================================
+// A number of custom `state` values can be set to break up words
+// into fragments of various kinds with whatever separator you want.
+
+// Note: When you change `state` or `state` properties, your current
+// word gets reset to the start. There's an example lower down.
+
+var state = { maxNumCharacters: 5 },
+    ps2 = new ProseStepper( state ),
+    sentences2 = [ [ 'Victorious,', 'you', 'brave', 'flag.' ] ];
+
+ps2.process( sentences2 );
+
+var one2 = ps2.getFragment( [0, 0, 1] );  // 'Vict-'
+
+// Note the reset here to the beginning of the word despite
+// a fragment delta of 1
+state.separator = '%';
+var two2 = ps2.getFragment( [0, 0, 1] );  // 'orio%'
+
+
+// ================================
 // RESTART
 // ================================
 // Go back to the beginning of the text
-ps2.getFragment( 5 )
+ps2.getFragment( 5 )  // 'flag.'
 ps2.restart()
 // Get current fragment
 var three2 = ps2.getFragment( [0, 0, 0] );  // 'Vict%'
@@ -197,15 +230,32 @@ var three2 = ps2.getFragment( [0, 0, 0] );  // 'Vict%'
 // GETTERS
 // ================================
 
-// A fraction between 0 and 1 inclusive representing where in the
-// text you are. 0 is at the very start, 1 means you're at the end
-var progress = ps2.getProgress();  // 0
+// "Progress" is a fraction GREATER THAN 0 and LESS THAN OR
+// EQUAL TO 1 representing where in the text you are. 1 means
+// you're at the end. NOTE: There is no 0. If you want to
+// detect the start, you'll have to do it another way. Checking
+// that `ps.getIndex()` === 0 is one way. (We can have either
+// 0 at start or 1 at end. The latter seemed more appropriate.)
+var prog1 = ps2.getProgress();  // (1/3)/4
+
+// "Relative progress" is an array of fractions, each representing
+// the progress within in each array (sentences in the text, words
+// in a sentence, fragments in a word)
+var rProg1 = ps2.getRelativeProgress();  // [ 1, 1/4, 1/3 ]
+
+ps2.getFragment([0, 2, 0]);  // 'brave'
+var prog2 = ps2.getProgress();  // 0.75
+var rProg2 = ps2.getRelativeProgress();  // [ 1, 3/4, 1 ]
+
+ps2.getFragment([0, 0, 1]);  // 'flag.'
+var prog3 = ps2.getProgress();  // 1
+var rProg3 = ps2.getRelativeProgress();  // [ 1, 1, 1 ]
 
 // The number of words in the text collection
 var length = ps2.getLength();  // 4
 
-// The number of the word you're currently at
-var index = ps2.getIndex();  // 0
+// The number of the word you're currently at (out of total words)
+var index = ps2.getIndex();  // 3
 
 
 // ================================
@@ -213,17 +263,17 @@ var index = ps2.getIndex();  // 0
 // ================================
 
 // Change the state object being used as a reference
-var newState = { maxNumCharacters: 200 }
+var newState = { maxNumCharacters: 4 }
+// Note: This, too, will reset to the start of the current word
 ps2.setState( newState );
-// Note: This will also reset to the start of the current word
-var two2 = ps2.getFragment( [0, 0, 1] );  // 'Victorious,'
+var four2 = ps2.getFragment( [0, 0, 1] );  // 'fl-'
 ```
 
 
 # Purposes
 It's built with RSVP ("rapid serial visual presentation" reading) apps in mind - apps that show you text one word at a time. RSVP can help increase accessibility for people with visual impairments or some people with certain learning difficulties. It can also be used for speed reading.
 
-`prose-stepper` allows words to be broken into fragments of specific lengths because some visual impairments make larger words difficult to read. Some can limit vision to one small area, while others can blur vision so much that text has to be very large to be legible.
+`prose-stepper` allows words to be broken into fragments of specific lengths because some visual impairments make larger words difficult to read. Some can limit vision to one small area, while others can blur vision so much that text has to be very large to be legible, leaving little room for multiple characters.
 
 
 # Contributing

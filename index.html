@@ -14,7 +14,8 @@
 
 		console.log('Example Results (see index.html for code):')
 
-		var ps1 = new ProseStepper()
+		// var ps1 = new ProseStepper( {maxNumCharacters: 5} );
+		var ps1 = new ProseStepper();
 
 		// ================================
 		// DATA
@@ -24,8 +25,9 @@
 			[ 'Victorious,', 'you','brave', 'flag.' ],
 			[ 'Delirious,', 'I', 'come', 'back.' ],
 			[ '\n' ],
-			[ 'Why,', 'oh', 'walrus?' ]
+			[ 'Why,', 'oh', 'wattlebird?' ]
 		];
+
 
 		// ================================
 		// PROCESSING
@@ -37,10 +39,10 @@
 		// STEPPING
 		// ================================
 		// prose-stepper's `.getFragment()` can take an array with three
-		// integers - a vector with three deltas. That is, an array with
-		// three values that each indicate a direction and a distance to
-		// travel within each array. At the moment, only one of the deltas can
-		// be active at a time. The other's all have to be 0.
+		// integers - three deltas. That is, an array with three values that
+		// each indicate a direction and a distance to travel within each array.
+		// At the moment, only one of the deltas can be active at a time. The
+		// other's all have to be 0.
 
 		// All 0's will get you the current fragment. Result at the very start:
 		var one = ps1.getFragment( [0, 0, 0] );  // 'Victorious,'
@@ -80,13 +82,13 @@
 		var nine = ps1.getFragment( [0, -7, 0] );  // 'brave'
 		console.log( '9:', nine, nine === 'brave' );
 
-		// With stepping, you can't before the first word...
+		// With stepping, you can't get before the first word...
 		var ten = ps1.getFragment( [-100, 0, 0] );  // 'Victorious,'
 		console.log( '10:', ten, ten === 'Victorious,' );
 
 		// ...or past the last one
-		var eleven = ps1.getFragment( [100, 0, 0] );  // 'walrus?'
-		console.log( '11:', eleven, eleven === 'walrus?' );
+		var eleven = ps1.getFragment( [100, 0, 0] );  // 'wattlebird?'
+		console.log( '11:', eleven, eleven === 'wattlebird?' );
 
 		// In the middle of a sentence, a sentence delta of -1
 		// will go to the start of the current sentence
@@ -97,7 +99,7 @@
 		// ================================
 		// JUMPING
 		// ================================
-		// prose-stepper's `.getFragment()` can also take a positive
+		// prose-stepper's `.getFragment()` can also take a single positive
 		// or negative integer.
 
 		// Jump to any position in the text as if it were a flat array
@@ -112,15 +114,18 @@
 		// Integers past the end of the collection... well, that behavior
 		// hasn't been decided yet. Currently, that just gives the
 		// last word.
-		var fiftn = ps1.getFragment( 20 );  // 'walrus?'
-		console.log( '15:', fiftn, fiftn === 'walrus?' );
+		var fiftn = ps1.getFragment( 20 );  // 'wattlebird?'
+		console.log( '15:', fiftn, fiftn === 'wattlebird?' );
 
 
 		// ================================
 		// CUSTOM `state` VALUES
 		// ================================
-		// Note: When you change `state` or `state` values, your current
-		// word gets reset to the start. See the example below.
+		// A number of custom `state` values can be set to break up words
+		// into fragments of various kinds with whatever separator you want.
+
+		// Note: When you change `state` or `state` properties, your current
+		// word gets reset to the start. There's an example lower down.
 
 		var state = { maxNumCharacters: 5 },
 			ps2 = new ProseStepper( state ),
@@ -128,8 +133,8 @@
 
 		ps2.process( sentences2 );
 
-		var one2 = ps2.getFragment( [0, 0, 0] );  // 'Vict-'
-		console.log( '1(2):', one2, one2 === 'Vict-' );
+		var one2 = ps2.getFragment( [0, 0, 1] );  // 'Vict-'
+		console.log( '1(2):', one2, one2 === 'orio-' );
 
 		// Note the reset here to the beginning of the word despite
 		// a fragment delta of 1
@@ -142,7 +147,7 @@
 		// RESTART
 		// ================================
 		// Go back to the beginning of the text
-		ps2.getFragment( 5 )
+		ps2.getFragment( 5 )  // 'flag.'
 		ps2.restart()
 		// Get current fragment
 		var three2 = ps2.getFragment( [0, 0, 0] );  // 'Vict%'
@@ -153,18 +158,40 @@
 		// GETTERS
 		// ================================
 
-		// A fraction between 0 and 1 inclusive representing where in the
-		// text you are. 0 is at the very start, 1 means you're at the end
-		var progress = ps2.getProgress();
-		console.log('progress:', progress );
+		// "Progress" is a fraction GREATER THAN 0 and LESS THAN OR
+		// EQUAL TO 1 representing where in the text you are. 1 means
+		// you're at the end. NOTE: There is no 0. If you want to
+		// detect the start, you'll have to do it another way. Checking
+		// that `ps.getIndex()` === 0 is one way. (We can have either
+		// 0 at start or 1 at end. The latter seemed more appropriate.)
+		var prog1 = ps2.getProgress();  // (1/3)/4
+		console.log( 'progress at start:', prog1, prog1 === (1/3)/4 );
+
+		// "Relative progress" is an array of fractions, each representing
+		// the progress within in each array (sentences in the text, words
+		// in a sentence, fragments in a word)
+		var rProg1 = ps2.getRelativeProgress();  // [ 1, 1/4, 1/3 ]
+		console.log( 'relative progress at start:', rProg1, rProg1[0] === 1, rProg1[1] === 1/4, rProg1[2] === 1/3 );
+
+		ps2.getFragment([0, 2, 0]);  // 'brave'
+		var prog2 = ps2.getProgress();  // 0.75
+		console.log( 'progress in middle:', prog2, prog2 === 0.75 );
+		var rProg2 = ps2.getRelativeProgress();  // [ 1, 3/4, 1 ]
+		console.log( 'relative progress in middle:', rProg2, rProg2[0] === 1, rProg2[1] === 3/4, rProg2[2] === 1 );
+
+		ps2.getFragment([0, 0, 1]);  // 'flag.'
+		var prog3 = ps2.getProgress();  // 1
+		console.log( 'progress at end:', prog3, prog3 === 1 );
+		var rProg3 = ps2.getRelativeProgress();  // [ 1, 1, 1 ]
+		console.log( 'relative progress at end:', rProg3, rProg3[0] === 1, rProg3[1] === 1, rProg3[2] === 1 );
 
 		// The number of words in the text collection
-		var length = ps2.getLength();
-		console.log('length:', length );
+		var length = ps2.getLength();  // 4
+		console.log('length:', length, length === 4 );
 
-		// The number of the word you're currently at
-		var index = ps2.getIndex();
-		console.log('index:', index );
+		// The number of the word you're currently at (out of total words)
+		var index = ps2.getIndex();  // 3
+		console.log('index:', index, index === 3 );
 
 
 		// ================================
@@ -172,11 +199,11 @@
 		// ================================
 
 		// Change the state object being used as a reference
-		var newState = { maxNumCharacters: 200 }
+		var newState = { maxNumCharacters: 4 }
+		// Note: This, too, will reset to the start of the current word
 		ps2.setState( newState );
-		// Note: This will also reset to the start of the current word
-		var four2 = ps2.getFragment( [0, 0, 1] );  // 'Victorious,'
-		console.log( '4(2):', four2, four2 === 'Victorious,' );
+		var four2 = ps2.getFragment( [0, 0, 1] );  // 'fl-'
+		console.log( '4(2):', four2, four2 === 'fl-' );
 
 	</script>
 </body>
