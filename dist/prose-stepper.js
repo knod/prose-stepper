@@ -14,7 +14,7 @@
         module.exports = stepFactory( require('@knod/hyphenaxe') );
     } else {  // Global if nothing else
         // Browser globals
-        root.ProseStepper = stepFactory( hyphenaxe );
+        root.ProseStepper = stepFactory( root.hyphenaxe );
     }
 }(this, function ( split ) {
 /* ( func ) -> ProseStepper */
